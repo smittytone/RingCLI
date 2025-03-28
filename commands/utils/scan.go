@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 	"strings"
-
+	// External code
 	"github.com/spf13/cobra"
 	"tinygo.org/x/bluetooth"
-
+	// Library code
 	rcBLE "ringcli/lib/ble"
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
@@ -28,8 +28,8 @@ const (
 var ScanCmd = &cobra.Command{
 	Use:   "scan",
 	Short: "Scan for rings",
-	Long: "Scan for rings",
-	Run:    doScan,
+	Long:  "Scan for rings",
+	Run:   doScan,
 }
 
 func doScan(cmd *cobra.Command, args []string) {

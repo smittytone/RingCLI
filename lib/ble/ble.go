@@ -10,9 +10,14 @@ import (
 )
 
 const (
-	CONNECT_TIMEOUT_S             = 60
-	SYNC_TIMEOUT_S                = 10
-	DEVICE_INFO_SERVICE_ID uint16 = 0x180A
+	CONNECT_TIMEOUT_S                                   = 60
+	SYNC_TIMEOUT_S                                      = 10
+	DEVICE_INFO_SERVICE_ID                       uint16 = 0x180A
+	DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID     uint16 = 0x2A29
+	DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID uint16 = 0x2A26
+	DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID uint16 = 0x2A27
+	DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID        uint16 = 0x2A23
+	DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID           uint16 = 0x2A50
 )
 
 var (

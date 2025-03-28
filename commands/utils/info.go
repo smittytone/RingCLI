@@ -2,11 +2,10 @@ package rcUtilsCommands
 
 import (
 	"fmt"
-	//"time"
-
+	// External code
 	"github.com/spf13/cobra"
 	"tinygo.org/x/bluetooth"
-
+	// Library code
 	rcBLE "ringcli/lib/ble"
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
@@ -32,8 +31,8 @@ var (
 var InfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Get ring info",
-	Long: "Get ring info",
-	Run:    getInfo,
+	Long:  "Get ring info",
+	Run:   getInfo,
 }
 
 func getInfo(cmd *cobra.Command, args []string) {
@@ -59,7 +58,7 @@ func getInfo(cmd *cobra.Command, args []string) {
 	requestBatteryInfo(device)
 
 	// Output received ring data
-	outputInfo()
+	outputRingInfo()
 }
 
 func requestBatteryInfo(ble bluetooth.Device) {
@@ -78,13 +77,19 @@ func receiveBatteryInfo(receivedData []byte) {
 
 func requestDeviceInfo(service bluetooth.DeviceService) {
 
+	uuidvendor := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID)
+	uuidfirmware := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID)
+	uuidhardware := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID)
+	uuidsystemid := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID)
+	uuidpnpid := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID)
+
 	// Get a list of characteristics within the service
 	characteristics := rcBLE.Characteristics(service, []bluetooth.UUID{
-		bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID),
-		bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID),
-		bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID),
-		bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID),
-		bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID),
+		uuidvendor,
+		uuidfirmware,
+		uuidhardware,
+		uuidsystemid,
+		uuidpnpid,
 	})
 
 	// Iterate over characteristics
@@ -94,30 +99,30 @@ func requestDeviceInfo(service bluetooth.DeviceService) {
 		if err == nil {
 			c := characteristic.UUID()
 
-			if c == bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID) {
+			if c == uuidvendor {
 				deviceInfo.maker = string(data)
 			}
 
-			if c == bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID) {
+			if c == uuidfirmware {
 				deviceInfo.firmware = string(data)
 			}
 
-			if c == bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID) {
+			if c == uuidhardware {
 				deviceInfo.hardware = string(data)
 			}
 
-			if c == bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID) {
+			if c == uuidsystemid {
 				deviceInfo.system = decodeSysId(data)
 			}
 
-			if c == bluetooth.New16BitUUID(DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID) {
+			if c == uuidpnpid {
 				deviceInfo.pnp = decodePnP(data)
 			}
 		}
 	}
 }
 
-func outputInfo() {
+func outputRingInfo() {
 
 	chargeState := "not charging"
 	if deviceInfo.battery.IsCharging {
