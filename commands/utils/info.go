@@ -49,6 +49,7 @@ func getInfo(cmd *cobra.Command, args []string) {
 	// Generate the ring BLE address and connect to it
 	bleAddress := rcBLE.AddressFromString(ringAddress)
 	device := rcBLE.Connect(ble, bleAddress)
+	defer rcBLE.Disconnect(device)
 	infoService := rcBLE.DeviceInfoService(device)
 
 	// Get the device data
@@ -64,7 +65,7 @@ func getInfo(cmd *cobra.Command, args []string) {
 func requestBatteryInfo(ble bluetooth.Device) {
 
 	requestPacket := rcColmi.MakeBatteryReq()
-	rcBLE.RequestDataViaUART(ble, requestPacket, receiveBatteryInfo)
+	rcBLE.RequestDataViaUART(ble, requestPacket, receiveBatteryInfo, 1)
 }
 
 func receiveBatteryInfo(receivedData []byte) {

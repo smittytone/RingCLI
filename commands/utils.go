@@ -18,5 +18,6 @@ func init() {
 
 	rcUtilsCommand.AddCommand(rcUtilsCommands.ScanCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.InfoCmd)
+	rcUtilsCommand.AddCommand(rcUtilsCommands.FindCmd)
 	rootCmd.AddCommand(rcUtilsCommand)
 }

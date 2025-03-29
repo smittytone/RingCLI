@@ -24,6 +24,8 @@ var (
 	connectTimer *time.Timer
 	syncTimer *time.Timer
 	UARTInfoReceived bool = false
+	isConnected bool = false
+	currentDevice *bluetooth.Device
 )
 
 func Open() *bluetooth.Adapter {
@@ -53,7 +55,26 @@ func Connect(adapter *bluetooth.Adapter, ringAddress bluetooth.Address) bluetoot
 		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not connect to %s", ringAddress)
 	}
 
+	isConnected = true
+	currentDevice = &device
 	return device
+}
+
+func Disconnect(device bluetooth.Device) {
+
+	err := device.Disconnect()
+	if err != nil {
+		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not cleanly disconnect from %s", device.Address.String())
+	}
+
+	isConnected = false
+}
+
+func Clean() {
+
+	if currentDevice != nil && isConnected {
+		Disconnect(*currentDevice)
+	}
 }
 
 func Services(ble bluetooth.Device, uuids []bluetooth.UUID) []bluetooth.DeviceService {
@@ -78,7 +99,37 @@ func Characteristics(service bluetooth.DeviceService, uuids []bluetooth.UUID) []
 	return characteristics
 }
 
-func RequestDataViaUART(ble bluetooth.Device, requestPacket []byte, callback func([]byte)) {
+func RequestDataViaUART(ble bluetooth.Device, requestPacket []byte, callback func([]byte), issueCount int) {
+
+	// Get the characteristics within the UART service
+	characteristics := ReadyUART(ble)
+
+	// Enable notifications via RX
+	calledCount := 0
+	err := characteristics[1].EnableNotifications(callback)
+	if err != nil {
+		connectTimer.Stop()
+		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not enable UART notifications: %s", err.Error())
+	}
+
+	for calledCount < issueCount {
+		UARTInfoReceived = false
+
+		// Request data via the TX
+		_, err = characteristics[0].WriteWithoutResponse(requestPacket)
+		if err != nil {
+			rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not write UART packet: %s", err.Error())
+		}
+
+		for !UARTInfoReceived {
+			// Wait for the return packet(s)...
+		}
+
+		calledCount += 1
+	}
+}
+
+func ReadyUART(ble bluetooth.Device) []bluetooth.DeviceCharacteristic {
 
 	// Get the UART service
 	uuid := UUIDFromString("6E40FFF0-B5A3-F393-E0A9-E50E24DCCA9E")
@@ -87,25 +138,7 @@ func RequestDataViaUART(ble bluetooth.Device, requestPacket []byte, callback fun
 	// Get the characteristics within the UART service
 	tx := UUIDFromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
 	rx := UUIDFromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
-	characteristics := Characteristics(service[0], []bluetooth.UUID{tx, rx})
-
-	// Enable notifications via RX
-	UARTInfoReceived = false
-	err := characteristics[1].EnableNotifications(callback)
-	if err != nil {
-		connectTimer.Stop()
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not enable UART notifications: %s", err.Error())
-	}
-
-	// Request data via the TX
-	_, err = characteristics[0].WriteWithoutResponse(requestPacket)
-	if err != nil {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not write UART packet: %s", err.Error())
-	}
-
-	for !UARTInfoReceived {
-		// Wait for the return packet(s)...
-	}
+	return Characteristics(service[0], []bluetooth.UUID{tx, rx})
 }
 
 func DeviceInfoService(bleDevice bluetooth.Device) bluetooth.DeviceService {

@@ -36,6 +36,7 @@ func getSteps(cmd *cobra.Command, args []string) {
 	// Generate the ring BLE address and connect to it
 	bleAddress := rcBLE.AddressFromString(ringAddress)
 	device := rcBLE.Connect(ble, bleAddress)
+	defer rcBLE.Disconnect(device)
 
 	// Get the activity data
 	requestSportsInfo(device)
@@ -53,7 +54,7 @@ func requestSportsInfo(ble bluetooth.Device) {
 	}
 
 	activityTotals = rcColmi.SportsInfo{}
-	rcBLE.RequestDataViaUART(ble, requestPacket, receiveSportsInfo)
+	rcBLE.RequestDataViaUART(ble, requestPacket, receiveSportsInfo, 1)
 }
 
 func receiveSportsInfo(receivedData []byte) {
