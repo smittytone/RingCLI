@@ -13,6 +13,7 @@ import (
 
 var (
 	activityTotals rcColmi.SportsInfo
+	bspCount int
 )
 
 // Define the `scan` subcommand.
@@ -31,6 +32,7 @@ func getSteps(cmd *cobra.Command, args []string) {
 	}
 
 	// Enable BLE
+	bspCount = rcLog.Raw("Retrieving data...")
 	ble := rcBLE.Open()
 
 	// Generate the ring BLE address and connect to it
@@ -54,7 +56,7 @@ func requestSportsInfo(ble bluetooth.Device) {
 	}
 
 	activityTotals = rcColmi.SportsInfo{}
-	rcBLE.RequestDataViaUART(ble, requestPacket, receiveSportsInfo, 1)
+	rcBLE.RequestDataViaCommandUART(ble, requestPacket, receiveSportsInfo, 1)
 }
 
 func receiveSportsInfo(receivedData []byte) {
@@ -65,7 +67,7 @@ func receiveSportsInfo(receivedData []byte) {
 	}
 
 	// Check we have a SportsInfo response
-	if receivedData[0] == 0x43 {
+	if receivedData[0] == rcColmi.COMMAND_GET_ACTIVITY_DATA {
 		info := rcColmi.ParseStepsResp(receivedData)
 		if info.NoData {
 			// Mark as done
@@ -94,6 +96,10 @@ func receiveSportsInfo(receivedData []byte) {
 
 func outputStepsInfo() {
 
+	// Backspace x characters
+	rcLog.Backspaces(bspCount)
+
+	// Output...
 	rcLog.Report("Activity Info: %d/%d/%d %02d:%02d", activityTotals.Timestamp.Day, activityTotals.Timestamp.Month, activityTotals.Timestamp.Year, activityTotals.Timestamp.Hour, activityTotals.Timestamp.Minutes)
 	rcLog.Report("         Steps: %d", activityTotals.Steps)
 

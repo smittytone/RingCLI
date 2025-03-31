@@ -11,8 +11,22 @@ const (
 	WARNING_MESSAGE int = 2
 	DEBUG_MESSAGE   int = 3
 	DATA_OUTPUT     int = 4
+
+	ESC = "\x1B"
+	CSI = ESC + "["
 )
 
+func Raw(msg string, values ...any) int {
+
+	output := fmt.Sprintf(msg, values...)
+	fmt.Fprintf(os.Stderr, output)
+	return len(output)
+}
+
+func Backspaces(count int) {
+
+	Raw(CSI + fmt.Sprintf("%dD", count))
+}
 
 func Report(msg string, values ...any) {
 

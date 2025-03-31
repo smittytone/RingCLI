@@ -7,7 +7,7 @@ type BatteryInfo struct {
 
 func MakeBatteryReq() []byte {
 
-	return MakePacket(0x03, make([]byte, 0, 0))
+	return MakePacket(COMMAND_BATTERY_INFO, make([]byte, 0, 0))
 }
 
 func ParseBatteryResp(packet []byte) BatteryInfo {

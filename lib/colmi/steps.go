@@ -20,7 +20,7 @@ type SportsInfo struct {
 }
 
 var (
-	packetIndex int = 0
+	packetIndex     int = 0
 	doScaleCalories bool = false
 )
 
@@ -31,7 +31,7 @@ func MakeStepsReq(offset int) []byte {
 		return nil
 	}
 
-	return MakePacket(0x43, []byte{byte(offset), 0x0F, 0x00, 0x5F, 0x01})
+	return MakePacket(COMMAND_GET_ACTIVITY_DATA, []byte{byte(offset), 0x0F, 0x00, 0x5F, 0x01})
 }
 
 func ParseStepsResp(packet []byte) SportsInfo {

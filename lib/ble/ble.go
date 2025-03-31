@@ -5,19 +5,20 @@ import (
 
 	"tinygo.org/x/bluetooth"
 
+	rcColmi "ringcli/lib/colmi"
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
 )
 
 const (
-	CONNECT_TIMEOUT_S                                   = 60
-	SYNC_TIMEOUT_S                                      = 10
-	DEVICE_INFO_SERVICE_ID                       uint16 = 0x180A
-	DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID     uint16 = 0x2A29
-	DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID uint16 = 0x2A26
-	DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID uint16 = 0x2A27
-	DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID        uint16 = 0x2A23
-	DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID           uint16 = 0x2A50
+	CONNECT_TIMEOUT_S                                       = 60
+	SYNC_TIMEOUT_S                                          = 10
+	BLE_DEVICE_INFO_SERVICE_ID                       uint16 = 0x180A
+	BLE_DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID     uint16 = 0x2A29
+	BLE_DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID uint16 = 0x2A26
+	BLE_DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID uint16 = 0x2A27
+	BLE_DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID        uint16 = 0x2A23
+	BLE_DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID           uint16 = 0x2A50
 )
 
 var (
@@ -99,20 +100,21 @@ func Characteristics(service bluetooth.DeviceService, uuids []bluetooth.UUID) []
 	return characteristics
 }
 
-func RequestDataViaUART(ble bluetooth.Device, requestPacket []byte, callback func([]byte), issueCount int) {
+func RequestDataViaCommandUART(ble bluetooth.Device, requestPacket []byte, callback func([]byte), macWrites int) {
 
 	// Get the characteristics within the UART service
-	characteristics := ReadyUART(ble)
+	characteristics := ReadyCommandUART(ble)
+	writeCount := 0
 
 	// Enable notifications via RX
-	calledCount := 0
 	err := characteristics[1].EnableNotifications(callback)
 	if err != nil {
 		connectTimer.Stop()
 		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not enable UART notifications: %s", err.Error())
 	}
 
-	for calledCount < issueCount {
+	for writeCount < macWrites {
+		// Clear the 'data received' flag
 		UARTInfoReceived = false
 
 		// Request data via the TX
@@ -125,25 +127,37 @@ func RequestDataViaUART(ble bluetooth.Device, requestPacket []byte, callback fun
 			// Wait for the return packet(s)...
 		}
 
-		calledCount += 1
+		writeCount += 1
 	}
 }
 
-func ReadyUART(ble bluetooth.Device) []bluetooth.DeviceCharacteristic {
+func ReadyCommandUART(ble bluetooth.Device) []bluetooth.DeviceCharacteristic {
 
 	// Get the UART service
-	uuid := UUIDFromString("6E40FFF0-B5A3-F393-E0A9-E50E24DCCA9E")
+	uuid := UUIDFromString(rcColmi.UUID_BLE_COMMAND_UART_SERVICE)
 	service := Services(ble, []bluetooth.UUID{uuid})
 
 	// Get the characteristics within the UART service
-	tx := UUIDFromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
-	rx := UUIDFromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
+	tx := UUIDFromString(rcColmi.UUID_BLE_COMMAND_UART_TX_CHAR)
+	rx := UUIDFromString(rcColmi.UUID_BLE_COMMAND_UART_RX_CHAR)
+	return Characteristics(service[0], []bluetooth.UUID{tx, rx})
+}
+
+func ReadyDataUART(ble bluetooth.Device) []bluetooth.DeviceCharacteristic {
+
+	// Get the UART service
+	uuid := UUIDFromString(rcColmi.UUID_BLE_DATA_UART_SERVICE)
+	service := Services(ble, []bluetooth.UUID{uuid})
+
+	// Get the characteristics within the UART service
+	tx := UUIDFromString(rcColmi.UUID_BLE_DATA_UART_TX_CHAR)
+	rx := UUIDFromString(rcColmi.UUID_BLE_DATA_UART_RX_CHAR)
 	return Characteristics(service[0], []bluetooth.UUID{tx, rx})
 }
 
 func DeviceInfoService(bleDevice bluetooth.Device) bluetooth.DeviceService {
 
-	uuid := UUIDFromUInt16(DEVICE_INFO_SERVICE_ID)
+	uuid := UUIDFromUInt16(BLE_DEVICE_INFO_SERVICE_ID)
 	services := Services(bleDevice, []bluetooth.UUID{uuid})
 	return services[0]
 }

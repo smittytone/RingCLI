@@ -44,12 +44,12 @@ func findRing(cmd *cobra.Command, args []string) {
 	device := rcBLE.Connect(ble, bleAddress)
 	defer rcBLE.Disconnect(device)
 	requestPacket := rcColmi.MakeLedFlashReq()
-	rcBLE.RequestDataViaUART(device, requestPacket, packetSent, flashCount)
+	rcBLE.RequestDataViaCommandUART(device, requestPacket, packetSent, flashCount)
 }
 
 func packetSent(receivedData []byte) {
 
-	if receivedData[0] == 0x10 {
+	if receivedData[0] == rcColmi.COMMAND_BATTERY_FLASH_LED {
 		if continuousFlash {
 			// Pause between flashes to ensure smooth operation
 			time.Sleep(2 * time.Second)

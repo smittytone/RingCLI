@@ -1,7 +1,6 @@
 package rcUtilsCommands
 
 import (
-	"fmt"
 	"os"
 	"time"
 	"strings"
@@ -18,6 +17,7 @@ var (
 	rings map[string]string   = make(map[string]string)
 	devices map[string]string = make(map[string]string)
 	scanTimer *time.Timer
+	bspCount int
 )
 
 const (
@@ -34,7 +34,7 @@ var ScanCmd = &cobra.Command{
 
 func doScan(cmd *cobra.Command, args []string) {
 
-	fmt.Println("Scanning...")
+	bspCount = rcLog.Raw("Scanning...")
 
 	// Enable BLE
 	ble := rcBLE.Open()
@@ -98,6 +98,7 @@ func onScan(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 
 func printFoundRings() {
 
+	rcLog.Backspaces(bspCount)
 	if len(rings) > 0 {
 		for address, name := range rings {
 			rcLog.Report("Ring found: %s with BLE address %s", name, address)

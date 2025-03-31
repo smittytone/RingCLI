@@ -65,12 +65,12 @@ func getInfo(cmd *cobra.Command, args []string) {
 func requestBatteryInfo(ble bluetooth.Device) {
 
 	requestPacket := rcColmi.MakeBatteryReq()
-	rcBLE.RequestDataViaUART(ble, requestPacket, receiveBatteryInfo, 1)
+	rcBLE.RequestDataViaCommandUART(ble, requestPacket, receiveBatteryInfo, 1)
 }
 
 func receiveBatteryInfo(receivedData []byte) {
 
-	if receivedData[0] == 0x03 {
+	if receivedData[0] == rcColmi.COMMAND_BATTERY_INFO {
 		deviceInfo.battery = rcColmi.ParseBatteryResp(receivedData)
 		rcBLE.UARTInfoReceived = true
 	}
@@ -78,11 +78,11 @@ func receiveBatteryInfo(receivedData []byte) {
 
 func requestDeviceInfo(service bluetooth.DeviceService) {
 
-	uuidvendor := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID)
-	uuidfirmware := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID)
-	uuidhardware := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID)
-	uuidsystemid := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID)
-	uuidpnpid := rcBLE.UUIDFromUInt16(rcBLE.DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID)
+	uuidvendor := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID)
+	uuidfirmware := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID)
+	uuidhardware := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID)
+	uuidsystemid := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID)
+	uuidpnpid := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID)
 
 	// Get a list of characteristics within the service
 	characteristics := rcBLE.Characteristics(service, []bluetooth.UUID{
