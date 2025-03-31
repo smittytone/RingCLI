@@ -36,7 +36,7 @@ func MakeStepsReq(offset int) []byte {
 
 func ParseStepsResp(packet []byte) SportsInfo {
 
-	/*
+	/* SAMPLE
 	[67  240 12 1 0 0 0 0 0 0 0 0 0 0 0 64]
 	[67  37 3 40 0 0 12 142 0 32 0 20 0 0 0 97]
 	[67  37 3 40 24 1 12 87 0 15 0 12 0 0 0 42]
@@ -52,19 +52,18 @@ func ParseStepsResp(packet []byte) SportsInfo {
 	[67  37 3 40 64 11 12 69 0 15 0 9 0 0 0 71]
 	*/
 
-	// Nothing will be coming - no heart rate taken yet
-	if packetIndex == 0 && packet[1] == 0xFF {
-		reset()
+	// Nothing will be coming - no heart rate taken yet as the ring has not been worn yet
+	if packet[1] == 0xFF && packet[5] == 0 {
 		return SportsInfo{NoData: true}
 	}
 
-	// Seems to be a signal packet with no useful data
-	if packetIndex == 0 && packet[1] == 0xF0 {
+	// This seems to be a header signal packet included to set the calorie scale factor
+	if packet[1] == 0xF0 && packet[5] == 0 {
 		if packet[3] == 0x01 {
 			doScaleCalories = true
 		}
 
-		packetIndex += 1
+		// No valid data yet so return an empty struct
 		return SportsInfo{}
 	}
 
@@ -93,25 +92,16 @@ func ParseStepsResp(packet []byte) SportsInfo {
 		info.NewCalories = true
 	}
 
-	// Packet management?
+	// Packet management
 	currentPacket := int(packet[5])
 	maxPacket := int(packet[6]) - 1
 	if currentPacket == maxPacket {
 		// End of block
-		reset()
 		info.IsDone = true
-	} else {
-		packetIndex += 1
 	}
 
 	// Return the data for accrual
 	return info
-}
-
-func reset() {
-
-	packetIndex = 0
-	doScaleCalories = false
 }
 
 func bcdToDecimal(bcd int) int {
