@@ -100,33 +100,51 @@ func Characteristics(service bluetooth.DeviceService, uuids []bluetooth.UUID) []
 	return characteristics
 }
 
-func RequestDataViaCommandUART(ble bluetooth.Device, requestPacket []byte, callback func([]byte), macWrites int) {
+func RequestDataViaCommandUART(ble bluetooth.Device, requestPacket []byte, callback func([]byte), maxWrites uint) {
 
 	// Get the characteristics within the UART service
 	characteristics := ReadyCommandUART(ble)
-	writeCount := 0
+	noResponseExpected := false
+	var writeCount uint = 0
 
-	// Enable notifications via RX
-	err := characteristics[1].EnableNotifications(callback)
-	if err != nil {
-		connectTimer.Stop()
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not enable UART notifications: %s", err.Error())
+	// Do we need to await responses?
+	if maxWrites == 0 {
+		// Increment so that the command is sent...
+		maxWrites = 1
+
+		// ...but flag that we can exit without waiting for a response
+		noResponseExpected = true
+	} else {
+		// Enable notifications via RX
+		err := characteristics[1].EnableNotifications(callback)
+		if err != nil {
+			connectTimer.Stop()
+			rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not enable UART notifications: %s", err.Error())
+		}
 	}
 
-	for writeCount < macWrites {
+	// Send the command `maxWrites` times
+	for writeCount < maxWrites {
 		// Clear the 'data received' flag
 		UARTInfoReceived = false
 
 		// Request data via the TX
-		_, err = characteristics[0].WriteWithoutResponse(requestPacket)
+		_, err := characteristics[0].WriteWithoutResponse(requestPacket)
 		if err != nil {
 			rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BLE, "Could not write UART packet: %s", err.Error())
 		}
 
-		for !UARTInfoReceived {
-			// Wait for the return packet(s)...
+		// No response coming? Bail early
+		if noResponseExpected {
+			return
 		}
 
+		// Wait (block) for the command response packet(s)
+		for !UARTInfoReceived {
+			// NOP
+		}
+
+		// And that's one write done...
 		writeCount += 1
 	}
 }

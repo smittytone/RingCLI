@@ -12,6 +12,8 @@ CLI access to data stored on the Colmi R02 smart ring.
 
 ## Usage
 
+### Utilities
+
 At the moment, you require your ring’s BLE address to issue most sub-commands. Obtain it with:
 
 ```shell
@@ -41,6 +43,16 @@ ringlci utils find --address {your ring BLE address} --continuous
 ```
 
 To flash the LED every two seconds until you cancel. The ring will cease flashing after 200 seconds to preserve ring battery power.
+
+To shut the ring down, issue:
+
+```shell
+ringlci utils shutdown --address {your ring BLE address}
+```
+
+This powers down the ring. The ring can be restarted by placing it on its charger.
+
+### Data
 
 The above sub-commands are provided by the `utils` command. `ringcloi` also has a `data` command:
 

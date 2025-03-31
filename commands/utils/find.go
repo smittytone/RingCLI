@@ -14,7 +14,7 @@ import (
 
 var (
 	doneFlag bool = false
-	flashCount int = 1
+	flashCount uint = 1
 )
 
 // Define the `scan` subcommand.
@@ -44,10 +44,10 @@ func findRing(cmd *cobra.Command, args []string) {
 	device := rcBLE.Connect(ble, bleAddress)
 	defer rcBLE.Disconnect(device)
 	requestPacket := rcColmi.MakeLedFlashReq()
-	rcBLE.RequestDataViaCommandUART(device, requestPacket, packetSent, flashCount)
+	rcBLE.RequestDataViaCommandUART(device, requestPacket, flashPacketSent, flashCount)
 }
 
-func packetSent(receivedData []byte) {
+func flashPacketSent(receivedData []byte) {
 
 	if receivedData[0] == rcColmi.COMMAND_BATTERY_FLASH_LED {
 		if continuousFlash {
