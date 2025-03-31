@@ -27,7 +27,7 @@ func shutdownRing(cmd *cobra.Command, args []string) {
 	}
 
 	// Enable BLE
-	device := rcBLE.Connect(rcBLE.Open(), rcBLE.AddressFromString(ringAddress))
+	device := rcBLE.EnableAndConnect(ringAddress)
 	defer rcBLE.Disconnect(device)
 	rcBLE.RequestDataViaCommandUART(device, rcColmi.MakeShutdownReq(), shutdownPacketSent, 0)
 }

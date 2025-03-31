@@ -14,6 +14,8 @@ CLI access to data stored on the Colmi R02 smart ring.
 
 ### Utilities
 
+#### Scan for Rings
+
 At the moment, you require your ring’s BLE address to issue most sub-commands. Obtain it with:
 
 ```shell
@@ -24,11 +26,35 @@ If your ring is in range and powered, you should see it listed and you can copy 
 
 **Note** The `--first` in the command above causes `ringcli` to halt scanning on the first ring it finds. If you have multiple rings, do not include the `--first` switch. `ringcli` will now list all of them — or, at least, those it can detect in the 60-second scan window.
 
+#### Get Ring Info
+
 With your ring’s address you can now obtain more information about it, including its battery state:
 
 ```shell
 ringlci utils info --address {your ring BLE address}
 ```
+
+#### Get and Set Periodic Heart Rate Sampling
+
+To enable periodic heart rate readings, issue:
+
+```shell
+ringlci utils setheartrate --address {your ring BLE address} --period 60 --enable
+```
+
+The period is in minutes and must be in the range of 1 to 255. Setting the period to zero disables periodic readings, as does using the `--disable` switch (unless `--enable` has been included too).
+
+```shell
+ringlci utils setheartrate --address {your ring BLE address} --disable
+```
+
+This call gets the current state:
+
+```shell
+ringlci utils getheartrate --address {your ring BLE address}
+```
+
+#### Locate a Ring
 
 To locate your ring, if you’re unsure where it is, issue:
 
@@ -43,6 +69,8 @@ ringlci utils find --address {your ring BLE address} --continuous
 ```
 
 To flash the LED every two seconds until you cancel. The ring will cease flashing after 200 seconds to preserve ring battery power.
+
+#### Shutdown a Ring
 
 To shut the ring down, issue:
 

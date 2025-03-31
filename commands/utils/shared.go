@@ -10,11 +10,11 @@ const (
 
 // Globals for state
 var (
-	debug            bool = false
-	ringName         string = ""
-	ringAddress      string = ""
-	scanForFirstRing bool = false
-	continuousFlash  bool = false
+	debug               bool = false
+	ringName            string = ""
+	ringAddress         string = ""
+	scanForFirstRing    bool = false
+	continuousFlash     bool = false
 )
 
 // Set up the `utils` sub-commands' flags.
@@ -35,4 +35,16 @@ func init() {
 	// Add required flags: --address
 	ShutdownCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
 	ShutdownCmd.MarkFlagRequired("address")
+
+	// Add required flags: --address
+	SetHeartRateCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
+	SetHeartRateCmd.MarkFlagRequired("address")
+	// Add optional flags: --enable, --disable, --period
+	SetHeartRateCmd.Flags().BoolVarP(&heartRateEnableSet, "enable", "", false, "Enable periodic heart rate readings")
+	SetHeartRateCmd.Flags().BoolVarP(&heartRateDisableSet, "disable", "", false, "Disable periodic heart rate readings")
+	SetHeartRateCmd.Flags().IntVarP(&heartRatePeriod, "period", "p", 60, "Heart rate period readings in seconds (0-255)")
+
+	// Add required flags: --address
+	GetHeartRateCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
+	GetHeartRateCmd.MarkFlagRequired("address")
 }

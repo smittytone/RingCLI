@@ -78,6 +78,11 @@ func Clean() {
 	}
 }
 
+func EnableAndConnect(ringAddress string) bluetooth.Device {
+
+	return Connect(Open(), AddressFromString(ringAddress))
+}
+
 func Services(ble bluetooth.Device, uuids []bluetooth.UUID) []bluetooth.DeviceService {
 
 	services, err := ble.DiscoverServices(uuids)

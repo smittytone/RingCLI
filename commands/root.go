@@ -56,14 +56,15 @@ func init() {
 func showHelp() {
 
 	help := `ringcli
-Provides ready access to a range of Microvisor Cloud and device functionality,
+Manage your Colmi R02 smart ring and retrieve data from it.
 
 Usage:
   ringcli {COMMAND} [SUBCOMMAND] {REQUIRED VALUES} [FLAGS]
 
 Commands:
   data       Access ring activity and heath data.
-  utils      Scan for rings and get ring info, including battery state.
+  utils      Scan for rings, get specific ring info, including battery state,
+             and perform housekeeping tasks.
 
 For more information on each command, run
   ringcli {COMMAND} --help

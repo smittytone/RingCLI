@@ -10,15 +10,17 @@ import (
 var rcUtilsCommand = &cobra.Command{
 	Use:   "utils",
 	Short: "Ring utility commands",
-	Long:  "Scan for Colmi R02 rings and get current info about one of them.",
+	Long:  "Scan for Colmi R02 rings and perform housekeeping on one of them.",
 	Run:   showAppHelp,
 }
 
 func init() {
 
-	rcUtilsCommand.AddCommand(rcUtilsCommands.ScanCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.InfoCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.FindCmd)
+	rcUtilsCommand.AddCommand(rcUtilsCommands.InfoCmd)
+	rcUtilsCommand.AddCommand(rcUtilsCommands.ScanCmd)
+	rcUtilsCommand.AddCommand(rcUtilsCommands.GetHeartRateCmd)
+	rcUtilsCommand.AddCommand(rcUtilsCommands.SetHeartRateCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.ShutdownCmd)
 	rootCmd.AddCommand(rcUtilsCommand)
 }

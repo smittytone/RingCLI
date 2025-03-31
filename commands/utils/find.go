@@ -39,21 +39,20 @@ func findRing(cmd *cobra.Command, args []string) {
 	}
 
 	// Enable BLE
-	ble := rcBLE.Open()
-	bleAddress := rcBLE.AddressFromString(ringAddress)
-	device := rcBLE.Connect(ble, bleAddress)
+	device := rcBLE.EnableAndConnect(ringAddress)
 	defer rcBLE.Disconnect(device)
 	requestPacket := rcColmi.MakeLedFlashReq()
-	rcBLE.RequestDataViaCommandUART(device, requestPacket, flashPacketSent, flashCount)
+	rcBLE.RequestDataViaCommandUART(device, requestPacket, flashPacketResponseReceived, flashCount)
 }
 
-func flashPacketSent(receivedData []byte) {
+func flashPacketResponseReceived(receivedData []byte) {
 
 	if receivedData[0] == rcColmi.COMMAND_BATTERY_FLASH_LED {
 		if continuousFlash {
 			// Pause between flashes to ensure smooth operation
 			time.Sleep(2 * time.Second)
 		}
+
 		rcBLE.UARTInfoReceived = true
 	}
 }
