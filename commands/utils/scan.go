@@ -13,15 +13,17 @@ import (
 	rcLog "ringcli/lib/log"
 )
 
-var (
-	rings map[string]string   = make(map[string]string)
-	devices map[string]string = make(map[string]string)
-	scanTimer *time.Timer
-	bspCount int
-)
-
 const (
 	SCAN_TIMEOUT_S = 30
+)
+
+// Globals relevant only to this command
+var (
+	rings            map[string]string   = make(map[string]string)
+	devices          map[string]string = make(map[string]string)
+	scanTimer        *time.Timer
+	bspCount         int
+	scanForFirstRing bool = false
 )
 
 // Define the `scan` subcommand.

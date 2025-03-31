@@ -12,12 +12,14 @@ import (
 	rcColmi "ringcli/lib/colmi"
 )
 
+// Globals relevant only to this command
 var (
-	doneFlag bool = false
-	flashCount uint = 1
+	flashCount      uint = 1
+	doneFlag        bool = false
+	continuousFlash bool = false
 )
 
-// Define the `scan` subcommand.
+// Define the `find` subcommand.
 var FindCmd = &cobra.Command{
 	Use:   "find",
 	Short: "Locate ring",

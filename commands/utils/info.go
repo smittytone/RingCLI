@@ -22,12 +22,13 @@ type DeviceInfo struct {
 	battery rcColmi.BatteryInfo
 }
 
+// Globals relevant only to this command
 var (
 	batteryInfoReceived bool = false
-	deviceInfo DeviceInfo = DeviceInfo{}
+	deviceInfo          DeviceInfo = DeviceInfo{}
 )
 
-// Define the `scan` subcommand.
+// Define the `info` subcommand.
 var InfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Get ring info",

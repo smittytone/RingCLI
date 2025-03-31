@@ -8,13 +8,11 @@ const (
 	ADDRESS_COMMAND_TEXT = "The rings's BLE address. Required"
 )
 
-// Globals for state
+// Globals for all commands
 var (
 	debug               bool = false
 	ringName            string = ""
 	ringAddress         string = ""
-	scanForFirstRing    bool = false
-	continuousFlash     bool = false
 )
 
 // Set up the `utils` sub-commands' flags.

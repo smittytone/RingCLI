@@ -11,12 +11,13 @@ import (
 	rcColmi "ringcli/lib/colmi"
 )
 
+// Globals relevant only to this command
 var (
 	activityTotals rcColmi.SportsInfo
 	bspCount int
 )
 
-// Define the `scan` subcommand.
+// Define the `steps` sub-command.
 var StepsCmd = &cobra.Command{
 	Use:   "steps",
 	Short: "Get activity info",

@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Globals for state
+// Globals for all commands
 var (
 	debug       bool = false
 	ringName    string = ""

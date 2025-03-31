@@ -11,7 +11,7 @@ import (
 	rcColmi "ringcli/lib/colmi"
 )
 
-// Define the `scan` subcommand.
+// Define the `shutdown` subcommand.
 var ShutdownCmd = &cobra.Command{
 	Use:   "shutdown",
 	Short: "Power down a ring",
