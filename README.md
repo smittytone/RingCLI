@@ -1,4 +1,4 @@
-# RingCLI
+# RingCLI 0.1.0
 
 CLI access to data stored on the Colmi R02 smart ring.
 
@@ -70,6 +70,22 @@ ringlci utils find --address {your ring BLE address} --continuous
 
 To flash the LED every two seconds until you cancel. The ring will cease flashing after 200 seconds to preserve ring battery power.
 
+#### Bind a Ring
+
+To save having to enter the `--address` option every time, you can ‘bind’ your ring to your system. This retains the ring’s BLE address across runs.
+
+```shell
+ringlci utils bind --address {your ring BLE address}
+```
+
+To check a binding, run:
+
+```shell
+ringlci utils bind --show
+```
+
+You can only bind one ring: to check on other rings, pass in a temporary BLE address with the `--address` option.
+
 #### Shutdown a Ring
 
 To shut the ring down, issue:
@@ -81,6 +97,8 @@ ringlci utils shutdown --address {your ring BLE address}
 This powers down the ring. The ring can be restarted by placing it on its charger.
 
 ### Data
+
+#### Daily Steps, Calories Burned, Distance Moved
 
 The above sub-commands are provided by the `utils` command. `ringcloi` also has a `data` command:
 

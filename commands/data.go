@@ -17,6 +17,7 @@ var rcDataCommand = &cobra.Command{
 func init() {
 
 	rcDataCommand.AddCommand(rcDataCommands.StepsCmd)
+	rcDataCommand.AddCommand(rcDataCommands.HeartRateCmd)
 	rootCmd.AddCommand(rcDataCommand)
 }
 

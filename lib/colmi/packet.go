@@ -11,7 +11,7 @@ func MakePacket(command byte, data []byte) []byte {
 
 	if len(data) > 0 {
 		if len(data) > 14 {
-			rcLog.ReportErrorAndExit(3, "Colmi packet data must be 14 bytes or less")
+			rcLog.ReportErrorAndExit(3, "Colmi packet payload must be 14 bytes or less")
 		}
 
 		for i := range(len(data)) {
@@ -26,10 +26,16 @@ func MakePacket(command byte, data []byte) []byte {
 func checksum(packet []byte) byte {
 
 	// Add all the bytes together % 255
-	count := 0
-	for aByte := range packet {
+	var count byte = 0
+	for _, aByte := range packet {
 		count += aByte
 	}
 
-	return byte(count & 0xFF)
+	return count
+}
+
+func VerifyChecksum(packet []byte) bool {
+
+	chk := checksum(packet[0:15])
+	return chk == packet[15]
 }

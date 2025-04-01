@@ -16,6 +16,7 @@ var rcUtilsCommand = &cobra.Command{
 
 func init() {
 
+	rcUtilsCommand.AddCommand(rcUtilsCommands.BindCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.FindCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.InfoCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.ScanCmd)

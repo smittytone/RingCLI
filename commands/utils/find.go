@@ -7,8 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	// Library code
 	rcBLE "ringcli/lib/ble"
-	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
 	rcColmi "ringcli/lib/colmi"
 )
 
@@ -29,13 +27,12 @@ var FindCmd = &cobra.Command{
 
 func findRing(cmd *cobra.Command, args []string) {
 
-	// Bail when no ID data is provided
-	if ringName == "" && ringAddress == "" {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_PARAMS, "No name or address supplied")
-	}
+	// Make sure we have a ring BLE address from the command line or store
+	getRingAddress()
 
 	fmt.Println("Look for your ring")
 
+	// Set a long flash count for 'continuous', ie. not literally so
 	if continuousFlash {
 		flashCount = 99
 	}

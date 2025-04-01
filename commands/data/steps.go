@@ -14,7 +14,6 @@ import (
 // Globals relevant only to this command
 var (
 	activityTotals rcColmi.SportsInfo
-	bspCount int
 )
 
 // Define the `steps` sub-command.
@@ -27,18 +26,13 @@ var StepsCmd = &cobra.Command{
 
 func getSteps(cmd *cobra.Command, args []string) {
 
-	// Bail when no ID data is provided
-	if ringAddress == "" {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_PARAMS, "No name or address supplied")
-	}
+	// Make sure we have a ring BLE address from the command line or store
+	getRingAddress()
+
+	bspCount = rcLog.Raw("Retrieving data...")
 
 	// Enable BLE
-	bspCount = rcLog.Raw("Retrieving data...")
-	ble := rcBLE.Open()
-
-	// Generate the ring BLE address and connect to it
-	bleAddress := rcBLE.AddressFromString(ringAddress)
-	device := rcBLE.Connect(ble, bleAddress)
+	device := rcBLE.EnableAndConnect(ringAddress)
 	defer rcBLE.Disconnect(device)
 
 	// Get the activity data

@@ -6,8 +6,8 @@ import (
 	"github.com/spf13/cobra"
 	// Library code
 	rcBLE "ringcli/lib/ble"
-	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
+	//rcErrors "ringcli/lib/errors"
+	//rcLog "ringcli/lib/log"
 	rcColmi "ringcli/lib/colmi"
 )
 
@@ -21,10 +21,8 @@ var ShutdownCmd = &cobra.Command{
 
 func shutdownRing(cmd *cobra.Command, args []string) {
 
-	// Bail when no ID data is provided
-	if ringName == "" && ringAddress == "" {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_PARAMS, "No name or address supplied")
-	}
+	// Make sure we have a ring BLE address from the command line or store
+	getRingAddress()
 
 	// Enable BLE
 	device := rcBLE.EnableAndConnect(ringAddress)
