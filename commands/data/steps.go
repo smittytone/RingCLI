@@ -6,9 +6,9 @@ import (
 	"tinygo.org/x/bluetooth"
 	// Library code
 	rcBLE "ringcli/lib/ble"
+	rcColmi "ringcli/lib/colmi"
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
-	rcColmi "ringcli/lib/colmi"
 )
 
 // Globals relevant only to this command
@@ -100,14 +100,14 @@ func outputStepsInfo() {
 
 	// Check for later, alternative calories scaling
 	if activityTotals.NewCalories {
-		rcLog.Report("      Calories: %.02f kCal", float32(activityTotals.Calories) / 1000)
+		rcLog.Report("      Calories: %.02f kCal", float32(activityTotals.Calories)/1000)
 	} else {
 		rcLog.Report("      Calories: %d kCal", activityTotals.Calories)
 	}
 
 	// Adjust for range of movement order of magnitude
 	if activityTotals.Distance > 999 {
-		rcLog.Report("Distance Moved: %.02f km", float32(activityTotals.Distance) / 1000)
+		rcLog.Report("Distance Moved: %.02f km", float32(activityTotals.Distance)/1000)
 	} else {
 		rcLog.Report("Distance Moved: %d m", activityTotals.Distance)
 	}

@@ -1,7 +1,7 @@
 package rcColmi
 
 type BatteryInfo struct {
-	Level int
+	Level      int
 	IsCharging bool
 }
 

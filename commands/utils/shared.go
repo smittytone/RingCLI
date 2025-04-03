@@ -14,9 +14,9 @@ const (
 
 // Globals for all commands
 var (
-	debug               bool = false
-	ringName            string = ""
-	ringAddress         string = ""
+	debug       bool   = false
+	ringName    string = ""
+	ringAddress string = ""
 )
 
 // Set up the `utils` sub-commands' flags.

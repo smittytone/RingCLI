@@ -2,8 +2,8 @@ package rcUtilsCommands
 
 import (
 	"os"
-	"time"
 	"strings"
+	"time"
 	// External code
 	"github.com/spf13/cobra"
 	"tinygo.org/x/bluetooth"
@@ -19,7 +19,7 @@ const (
 
 // Globals relevant only to this command
 var (
-	rings            map[string]string   = make(map[string]string)
+	rings            map[string]string = make(map[string]string)
 	devices          map[string]string = make(map[string]string)
 	scanTimer        *time.Timer
 	bspCount         int

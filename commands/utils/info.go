@@ -8,23 +8,23 @@ import (
 	// Library code
 	rcBLE "ringcli/lib/ble"
 	//rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
 	rcColmi "ringcli/lib/colmi"
+	rcLog "ringcli/lib/log"
 )
 
 type DeviceInfo struct {
-	maker string
+	maker    string
 	firmware string
 	hardware string
-	name string
-	system string
-	pnp string
-	battery rcColmi.BatteryInfo
+	name     string
+	system   string
+	pnp      string
+	battery  rcColmi.BatteryInfo
 }
 
 // Globals relevant only to this command
 var (
-	batteryInfoReceived bool = false
+	batteryInfoReceived bool       = false
 	deviceInfo          DeviceInfo = DeviceInfo{}
 )
 
@@ -140,9 +140,9 @@ func outputRingInfo() {
 
 func decodePnP(data []byte) string {
 
-	vendorId := int(data[2]) << 8 + int(data[1])
-	productID := int(data[4]) << 8 + int(data[3])
-	productVersion := int(data[6]) << 8 + int(data[5])
+	vendorId := int(data[2])<<8 + int(data[1])
+	productID := int(data[4])<<8 + int(data[3])
+	productVersion := int(data[6])<<8 + int(data[5])
 
 	return fmt.Sprintf("Vendor ID 0x%04X Product ID 0x%04X Product Version 0x%04X", vendorId, productID, productVersion)
 }
@@ -150,7 +150,7 @@ func decodePnP(data []byte) string {
 func decodeSysId(data []byte) string {
 
 	total := 0
-	for i := range(8) {
+	for i := range 8 {
 		total += int(data[i]) << (56 - (i * 8))
 	}
 

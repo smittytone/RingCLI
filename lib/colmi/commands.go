@@ -2,7 +2,7 @@ package rcColmi
 
 const (
 	COMMAND_BATTERY_INFO      byte = 0x03
-	COMMAND_SHUTDOWN	      byte = 0x08
+	COMMAND_SHUTDOWN          byte = 0x08
 	COMMAND_BATTERY_FLASH_LED byte = 0x10
 	COMMAND_HEART_RATE_READ   byte = 0x15
 	COMMAND_HEART_RATE_PERIOD byte = 0x16

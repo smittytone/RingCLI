@@ -5,16 +5,16 @@ import (
 	"github.com/spf13/cobra"
 	// Library code
 	rcBLE "ringcli/lib/ble"
+	rcColmi "ringcli/lib/colmi"
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
-	rcColmi "ringcli/lib/colmi"
 )
 
 // Globals relevant only to this command
 var (
-	heartRateEnableSet 	bool = false
+	heartRateEnableSet  bool = false
 	heartRateDisableSet bool = false
-	heartRatePeriod     int = 60
+	heartRatePeriod     int  = 60
 )
 
 // Define the `setheartrate` sub-command.

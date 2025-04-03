@@ -11,10 +11,10 @@ import (
 
 // Globals for all commands
 var (
-	debug       bool = false
+	debug       bool   = false
 	ringName    string = ""
 	ringAddress string = ""
-	bspCount    int = 0
+	bspCount    int    = 0
 )
 
 // Set up the `data` sub-commands' flags.
@@ -33,10 +33,10 @@ func init() {
 func processFlags(cmd *cobra.Command, args []string) {
 
 	/*
-	err := mvAppConfig.ProcessCommonFlags()
-	if err != nil {
-		mvLog.ReportErrorAndExit("%s", err)
-	}
+		err := mvAppConfig.ProcessCommonFlags()
+		if err != nil {
+			mvLog.ReportErrorAndExit("%s", err)
+		}
 	*/
 }
 

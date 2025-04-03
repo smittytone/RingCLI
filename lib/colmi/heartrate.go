@@ -10,22 +10,22 @@ import (
 
 type HeartRateDatapoint struct {
 	Timestamp string
-	Rate int
+	Rate      int
 }
 
 type HeartRateData struct {
-	Rates []HeartRateDatapoint
+	Rates     []HeartRateDatapoint
 	DataRange int
-	Raw []byte
+	Raw       []byte
 	Timestamp time.Time
 }
 
 var (
-	lastPacket int = 0
+	lastPacket  int = 0
 	packetRange int = 0
 	initialTime time.Time
-	hrd HeartRateData
-	data []byte
+	hrd         HeartRateData
+	data        []byte
 )
 
 func MakeHeartRatePeriodGetReq() []byte {
@@ -130,7 +130,7 @@ func ParseHeartRateDataResp(packet []byte) *HeartRateData {
 			ts := (int(packet[5]) << 24) | (int(packet[4]) << 16) | (int(packet[3]) << 8) | int(packet[2])
 			initialTime = time.UnixMilli(int64(ts) * 1000)
 			data = append(data, packet[6:15]...)
-			packetIndex +=1
+			packetIndex += 1
 			return nil
 		}
 
@@ -141,9 +141,9 @@ func ParseHeartRateDataResp(packet []byte) *HeartRateData {
 		if int(packet[1]) == lastPacket {
 			// Return data
 			hrd = HeartRateData{
-				Rates: packageData(initialTime),
+				Rates:     packageData(initialTime),
 				DataRange: packetRange,
-				Raw: data,
+				Raw:       data,
 				Timestamp: initialTime,
 			}
 
@@ -165,8 +165,8 @@ func packageData(startTime time.Time) []HeartRateDatapoint {
 	hour := 0
 	min := 0
 	for !done {
-		var hrdp  HeartRateDatapoint = HeartRateDatapoint{
-			Rate: int(data[index]),
+		var hrdp HeartRateDatapoint = HeartRateDatapoint{
+			Rate:      int(data[index]),
 			Timestamp: fmt.Sprintf("%02d:%02d", hour, min),
 		}
 

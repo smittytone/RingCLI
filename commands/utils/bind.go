@@ -12,7 +12,7 @@ import (
 // Globals relevant only to this command
 var (
 	doOverwrite bool = false
-	doShow bool = false
+	doShow      bool = false
 )
 
 // Define the `find` subcommand.

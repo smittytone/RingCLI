@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
 	commands "ringcli/commands"
 	rcBLE "ringcli/lib/ble"
+	"syscall"
 )
 
 var (

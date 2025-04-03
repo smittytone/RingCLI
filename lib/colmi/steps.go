@@ -1,26 +1,26 @@
 package rcColmi
 
 type DateStamp struct {
-	Year int
-	Month int
-	Day int
-	Hour int
-	Minutes int
-	TimePhase int	// A 15 minute segment within a day
+	Year      int
+	Month     int
+	Day       int
+	Hour      int
+	Minutes   int
+	TimePhase int // A 15 minute segment within a day
 }
 
 type SportsInfo struct {
-	Timestamp DateStamp
-	Steps int
-	Distance int
-	Calories int
-	NoData bool
-	IsDone bool
+	Timestamp   DateStamp
+	Steps       int
+	Distance    int
+	Calories    int
+	NoData      bool
+	IsDone      bool
 	NewCalories bool
 }
 
 var (
-	packetIndex     int = 0
+	packetIndex     int  = 0
 	doScaleCalories bool = false
 )
 
@@ -70,21 +70,21 @@ func ParseStepsResp(packet []byte) SportsInfo {
 	// Assemble data from the packet
 	timeIndex := int(packet[4])
 	packetTime := DateStamp{
-		Year: 2000 + bcdToDecimal(int(packet[1])),
-		Month: bcdToDecimal(int(packet[2])),
-		Day: bcdToDecimal(int(packet[3])),
-		Hour: timeIndex / 4,
-		Minutes: timeIndex % 4 * 15,
+		Year:      2000 + bcdToDecimal(int(packet[1])),
+		Month:     bcdToDecimal(int(packet[2])),
+		Day:       bcdToDecimal(int(packet[3])),
+		Hour:      timeIndex / 4,
+		Minutes:   timeIndex % 4 * 15,
 		TimePhase: timeIndex,
 	}
 
 	info := SportsInfo{
 		Timestamp: packetTime,
-		Steps: int(packet[10]) << 8 + int(packet[9]),
-		Distance: int(packet[12]) << 8 + int(packet[11]),
-		Calories: int(packet[8]) << 8 + int(packet[7]),
-		NoData: false,
-		IsDone: false,
+		Steps:     int(packet[10])<<8 + int(packet[9]),
+		Distance:  int(packet[12])<<8 + int(packet[11]),
+		Calories:  int(packet[8])<<8 + int(packet[7]),
+		NoData:    false,
+		IsDone:    false,
 	}
 
 	if doScaleCalories {

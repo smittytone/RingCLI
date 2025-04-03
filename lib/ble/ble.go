@@ -22,11 +22,11 @@ const (
 )
 
 var (
-	connectTimer *time.Timer
-	syncTimer *time.Timer
+	connectTimer     *time.Timer
+	syncTimer        *time.Timer
 	UARTInfoReceived bool = false
-	isConnected bool = false
-	currentDevice *bluetooth.Device
+	isConnected      bool = false
+	currentDevice    *bluetooth.Device
 )
 
 func Open() *bluetooth.Adapter {

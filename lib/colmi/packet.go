@@ -14,8 +14,8 @@ func MakePacket(command byte, data []byte) []byte {
 			rcLog.ReportErrorAndExit(3, "Colmi packet payload must be 14 bytes or less")
 		}
 
-		for i := range(len(data)) {
-			packet[i + 1] = data[i]
+		for i := range len(data) {
+			packet[i+1] = data[i]
 		}
 	}
 
