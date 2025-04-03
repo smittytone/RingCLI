@@ -84,3 +84,12 @@ func MakeBinding(address string, overwrite bool) {
 		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BINDING_FILE_ERROR, "Could not store binding")
 	}
 }
+
+func ToBCD(data int) byte {
+
+	if data > 99 || data < 0 {
+		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_BCD_INPUT_VALUE, "Unsuitable value for BCD conversion")
+	}
+
+	return byte(((data / 10) << 4) | (data % 10))
+}

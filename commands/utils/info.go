@@ -2,14 +2,11 @@ package rcUtilsCommands
 
 import (
 	"fmt"
-	// External code
 	"github.com/spf13/cobra"
-	"tinygo.org/x/bluetooth"
-	// Library code
 	rcBLE "ringcli/lib/ble"
-	//rcErrors "ringcli/lib/errors"
 	rcColmi "ringcli/lib/colmi"
 	rcLog "ringcli/lib/log"
+	"tinygo.org/x/bluetooth"
 )
 
 type DeviceInfo struct {

@@ -1,16 +1,14 @@
 package rcUtilsCommands
 
 import (
-	"os"
-	"strings"
-	"time"
-	// External code
 	"github.com/spf13/cobra"
-	"tinygo.org/x/bluetooth"
-	// Library code
+	"os"
 	rcBLE "ringcli/lib/ble"
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
+	"strings"
+	"time"
+	"tinygo.org/x/bluetooth"
 )
 
 const (
@@ -22,7 +20,6 @@ var (
 	rings            map[string]string = make(map[string]string)
 	devices          map[string]string = make(map[string]string)
 	scanTimer        *time.Timer
-	bspCount         int
 	scanForFirstRing bool = false
 )
 

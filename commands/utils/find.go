@@ -2,12 +2,10 @@ package rcUtilsCommands
 
 import (
 	"fmt"
-	"time"
-	// External code
 	"github.com/spf13/cobra"
-	// Library code
 	rcBLE "ringcli/lib/ble"
 	rcColmi "ringcli/lib/colmi"
+	"time"
 )
 
 // Globals relevant only to this command

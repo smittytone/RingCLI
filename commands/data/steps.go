@@ -1,14 +1,12 @@
 package rcDataCommands
 
 import (
-	// External code
 	"github.com/spf13/cobra"
-	"tinygo.org/x/bluetooth"
-	// Library code
 	rcBLE "ringcli/lib/ble"
 	rcColmi "ringcli/lib/colmi"
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
+	"tinygo.org/x/bluetooth"
 )
 
 // Globals relevant only to this command

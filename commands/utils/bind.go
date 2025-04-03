@@ -1,9 +1,7 @@
 package rcUtilsCommands
 
 import (
-	// External code
 	"github.com/spf13/cobra"
-	// Library code
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
 	rcUtils "ringcli/lib/utils"
@@ -15,7 +13,7 @@ var (
 	doShow      bool = false
 )
 
-// Define the `find` subcommand.
+// Define the `bind` subcommand.
 var BindCmd = &cobra.Command{
 	Use:   "bind",
 	Short: "Store a ring address",

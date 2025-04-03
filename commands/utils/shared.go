@@ -1,8 +1,6 @@
 package rcUtilsCommands
 
 import (
-	//"github.com/spf13/cobra"
-	// App
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
 	rcUtils "ringcli/lib/utils"
@@ -17,6 +15,7 @@ var (
 	debug       bool   = false
 	ringName    string = ""
 	ringAddress string = ""
+	bspCount    int    = 0
 )
 
 // Set up the `utils` sub-commands' flags.

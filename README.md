@@ -26,6 +26,16 @@ If your ring is in range and powered, you should see it listed and you can copy 
 
 **Note** The `--first` in the command above causes `ringcli` to halt scanning on the first ring it finds. If you have multiple rings, do not include the `--first` switch. `ringcli` will now list all of them — or, at least, those it can detect in the 60-second scan window.
 
+#### Set Ring Time
+
+If you haven’t used another app to set the date and time on your ring, run:
+
+```shell
+ringlci utils settime --address {your ring BLE address}
+```
+
+You will need to do this to initialise your ring for use if you have not done so already.
+
 #### Get Ring Info
 
 With your ring’s address you can now obtain more information about it, including its battery state:
@@ -100,7 +110,7 @@ This powers down the ring. The ring can be restarted by placing it on its charge
 
 #### Daily Steps, Calories Burned, Distance Moved
 
-The above sub-commands are provided by the `utils` command. `ringcloi` also has a `data` command:
+The above sub-commands are provided by the `utils` command. `ringcli` also has a `data` command:
 
 ```shell
 ringlci data steps --address {your ring BLE address}
@@ -108,6 +118,13 @@ ringlci data steps --address {your ring BLE address}
 
 This will output your current daily step count, activity based calorie burn and the distance you have travelled (estimate).
 
+#### Daily Heart Rate Log
+
+The `data` sub-command `heartrate` will retrieve the day’s heart rate readings (from midnight to the current time):
+
+```shell
+ringlci data heartrate --address {your ring BLE address}
+```
 
 ## Copyright and Licence
 

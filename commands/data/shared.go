@@ -1,9 +1,7 @@
 package rcDataCommands
 
 import (
-	// External code
 	"github.com/spf13/cobra"
-	// App
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
 	rcUtils "ringcli/lib/utils"

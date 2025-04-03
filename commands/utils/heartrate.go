@@ -1,9 +1,7 @@
 package rcUtilsCommands
 
 import (
-	// External code
 	"github.com/spf13/cobra"
-	// Library code
 	rcBLE "ringcli/lib/ble"
 	rcColmi "ringcli/lib/colmi"
 	rcErrors "ringcli/lib/errors"

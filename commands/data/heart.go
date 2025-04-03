@@ -82,22 +82,23 @@ func outputHeartData() {
 		if hrdp.Timestamp.Before(time.Now()) || hrdp.Timestamp.Equal(time.Now()) {
 			if hrdp.Rate == 0 {
 				if start == "" {
-					start = fmt.Sprintf("  Ring not worn from %s to", hrdp.Time)
+					start = fmt.Sprintf("  Ring not worn or no data available from %s to", hrdp.Time)
 				} else {
 					end = hrdp.Time
 				}
 			} else {
 				if start != "" {
-					rcLog.Report("%s %s", start, end)
+					rcLog.Report("%s %s (UTC)", start, end)
 					start = ""
+					end = "now"
 				}
 
-				rcLog.Report("  %d bpm at %s", hrdp.Rate, hrdp.Time)
+				rcLog.Report("  %d bpm at %s (UTC)", hrdp.Rate, hrdp.Time)
 			}
 		}
 	}
 
 	if start != "" {
-		rcLog.Report("%s %s", start, end)
+		rcLog.Report("%s %s (UTC)", start, end)
 	}
 }
