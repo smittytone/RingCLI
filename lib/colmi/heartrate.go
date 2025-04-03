@@ -74,7 +74,7 @@ func ParseHeartRatePeriodResp(packet []byte) (bool, byte) {
 	return false, 0
 }
 
-func ParseHeartRateDataResp(packet []byte) *HeartRateData {
+func ParseHeartRateDataResp(packet []byte, minutesInterval int) *HeartRateData {
 
 	/* SAMPLE
 	[21 0 24 5 0 0 0 0 0 0 0 0 0 0 0 50]
@@ -106,12 +106,12 @@ func ParseHeartRateDataResp(packet []byte) *HeartRateData {
 	if packet[0] == 0x15 {
 		if packet[1] == 0xFF {
 			// ERROR
-			rcLog.ReportError("Input heartrate data packet malformed")
+			rcLog.ReportError("Input heart rate data packet malformed")
 			return nil
 		}
 
 		if !VerifyChecksum(packet) {
-			rcLog.ReportError("Checkum fail")
+			rcLog.ReportError("Checksum fail")
 		}
 
 		// Header packet
@@ -119,7 +119,6 @@ func ParseHeartRateDataResp(packet []byte) *HeartRateData {
 			lastPacket = int(packet[2]) - 1
 			packetRange = int(packet[3]) // What is this for???
 			data = make([]byte, 0, 255)
-			//rates = make([]HeartRateCount, 0, packet[2] - 2)
 			packetIndex += 1
 			return nil
 		}
@@ -141,7 +140,7 @@ func ParseHeartRateDataResp(packet []byte) *HeartRateData {
 		if int(packet[1]) == lastPacket {
 			// Return data
 			hrd = HeartRateData{
-				Rates:     packageData(initialTime),
+				Rates:     packageData(initialTime, minutesInterval),
 				DataRange: packetRange,
 				Raw:       data,
 				Timestamp: initialTime,
@@ -154,10 +153,10 @@ func ParseHeartRateDataResp(packet []byte) *HeartRateData {
 	return nil
 }
 
-func packageData(startTime time.Time) []HeartRateDatapoint {
+func packageData(startTime time.Time, interval int) []HeartRateDatapoint {
 
 	count := (len(data) / 6) / 5
-	minuteDelta := 60 / count
+	minuteDelta := interval
 	fmt.Println(count, minuteDelta)
 	results := make([]HeartRateDatapoint, 0, 24)
 	done := false

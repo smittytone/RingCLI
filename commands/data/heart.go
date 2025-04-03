@@ -16,6 +16,8 @@ import (
 
 var (
 	heartRateData *rcColmi.HeartRateData
+	dataEnabled bool
+	dataInterval int
 )
 
 // Define the `heartrate` sub-command.
@@ -38,6 +40,9 @@ func getHeartRate(cmd *cobra.Command, args []string) {
 	device := rcBLE.EnableAndConnect(ringAddress)
 	defer rcBLE.Disconnect(device)
 
+	// Get the data interval
+	rcBLE.RequestDataViaCommandUART(device, rcColmi.MakeHeartRatePeriodGetReq(), receiveHeartDataSettings, 1)
+
 	// Get the activity data
 	requestHeartData(device)
 
@@ -56,13 +61,20 @@ func requestHeartData(ble bluetooth.Device) {
 func receiveHeartData(receivedData []byte) {
 
 	fmt.Println(receivedData)
-	a := rcColmi.ParseHeartRateDataResp(receivedData)
+	a := rcColmi.ParseHeartRateDataResp(receivedData, dataInterval)
 	if a != nil {
 		// Got data
 		rcBLE.UARTInfoReceived = true
 		heartRateData = a
-	} else {
-		fmt.Println("NIL")
+	}
+}
+
+func receiveHeartDataSettings(receivedData []byte) {
+
+	if receivedData[0] == rcColmi.COMMAND_HEART_RATE_PERIOD {
+		// Signal data received
+		rcBLE.UARTInfoReceived = true
+		dataEnabled, dataInterval = rcColmi.ParseHeartRatePeriodResp(receivedData)
 	}
 }
 
