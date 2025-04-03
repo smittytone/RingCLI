@@ -74,7 +74,8 @@ func receiveHeartDataSettings(receivedData []byte) {
 	if receivedData[0] == rcColmi.COMMAND_HEART_RATE_PERIOD {
 		// Signal data received
 		rcBLE.UARTInfoReceived = true
-		dataEnabled, dataInterval = rcColmi.ParseHeartRatePeriodResp(receivedData)
+		dataEnabled, byte = rcColmi.ParseHeartRatePeriodResp(receivedData)
+		dataInterval = int(byte)
 	}
 }
 
