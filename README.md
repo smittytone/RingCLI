@@ -44,6 +44,14 @@ With your ring’s address you can now obtain more information about it, includi
 ringlci utils info --address {your ring BLE address}
 ```
 
+#### Get Battery State
+
+To just get the ring’s battery state, issue:
+
+```shell
+ringlci utils battery --address {your ring BLE address}
+```
+
 #### Get and Set Periodic Heart Rate Sampling
 
 To enable periodic heart rate readings, issue:
