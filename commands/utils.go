@@ -16,6 +16,7 @@ var rcUtilsCommand = &cobra.Command{
 
 func init() {
 
+	rcUtilsCommand.AddCommand(rcUtilsCommands.BatteryCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.BindCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.SetTimeCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.FindCmd)

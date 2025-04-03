@@ -6,6 +6,7 @@ import (
 	rcColmi "ringcli/lib/colmi"
 	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
+	rcUtils "ringcli/lib/utils"
 	"tinygo.org/x/bluetooth"
 )
 
@@ -28,6 +29,7 @@ func getSteps(cmd *cobra.Command, args []string) {
 	getRingAddress()
 
 	bspCount = rcLog.Raw("Retrieving data...")
+	rcUtils.AnimateCursor()
 
 	// Enable BLE
 	device := rcBLE.EnableAndConnect(ringAddress)
@@ -89,7 +91,7 @@ func receiveSportsInfo(receivedData []byte) {
 
 func outputStepsInfo() {
 
-	// Backspace x characters
+	rcUtils.StopAnimation()
 	rcLog.Backspaces(bspCount)
 
 	// Output...

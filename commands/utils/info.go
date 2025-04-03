@@ -6,6 +6,7 @@ import (
 	rcBLE "ringcli/lib/ble"
 	rcColmi "ringcli/lib/colmi"
 	rcLog "ringcli/lib/log"
+	rcUtils "ringcli/lib/utils"
 	"tinygo.org/x/bluetooth"
 )
 
@@ -38,13 +39,12 @@ func getInfo(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	// Enable BLE
-	ble := rcBLE.Open()
-	deviceInfo.battery.Level = 0
+	bspCount = rcLog.Raw("Retrieving ring information...  ")
+	rcUtils.AnimateCursor()
 
-	// Generate the ring BLE address and connect to it
-	bleAddress := rcBLE.AddressFromString(ringAddress)
-	device := rcBLE.Connect(ble, bleAddress)
+	// Enable BLE
+	deviceInfo.battery.Level = 0
+	device := rcBLE.EnableAndConnect(ringAddress)
 	defer rcBLE.Disconnect(device)
 	infoService := rcBLE.DeviceInfoService(device)
 
@@ -55,7 +55,7 @@ func getInfo(cmd *cobra.Command, args []string) {
 	requestBatteryInfo(device)
 
 	// Output received ring data
-	outputRingInfo()
+	outputRingInfo(false)
 }
 
 func requestBatteryInfo(ble bluetooth.Device) {
@@ -119,15 +119,25 @@ func requestDeviceInfo(service bluetooth.DeviceService) {
 	}
 }
 
-func outputRingInfo() {
+func outputRingInfo(showBatteryOnly bool) {
+
+	rcUtils.StopAnimation()
+
+	if bspCount > 0 {
+		rcLog.Backspaces(bspCount)
+	}
 
 	chargeState := "not charging"
 	if deviceInfo.battery.IsCharging {
 		chargeState = "charging"
 	}
 
-	rcLog.Report("Ring Info:")
-	rcLog.Report("         Battery: %d%% (%s)", deviceInfo.battery.Level, chargeState)
+	if showBatteryOnly {
+		rcLog.Report("Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
+		return
+	}
+
+	rcLog.Report("Ring Info:                     ")
 	rcLog.Report("Firmware Version: %s", deviceInfo.firmware)
 	rcLog.Report("Hardware Version: %s", deviceInfo.hardware)
 	rcLog.Report("    Manufacturer: %s", deviceInfo.maker)

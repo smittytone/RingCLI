@@ -9,6 +9,17 @@ import (
 	rcLog "ringcli/lib/log"
 )
 
+const (
+	cursor string = "|/-\\"
+)
+
+var (
+	animationTimer *time.Ticker
+	isAnimating    bool = false
+	animationDone  chan bool
+	cursorIndex    int = 0
+)
+
 func StartToday(date time.Time) time.Time {
 
 	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
@@ -92,4 +103,40 @@ func ToBCD(data int) byte {
 	}
 
 	return byte(((data / 10) << 4) | (data % 10))
+}
+
+func AnimateCursor() {
+
+	if isAnimating {
+		return
+	}
+
+	animationTimer = time.NewTicker(50 * time.Millisecond)
+	isAnimating = true
+	animationDone = make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-animationDone:
+				//rcLog.Backspaces(1)
+				isAnimating = false
+				return
+			case <-animationTimer.C:
+				cursorIndex += 1
+				if cursorIndex >= len(cursor) {
+					cursorIndex = 0
+				}
+
+				rcLog.Backspace(1)
+				_ = rcLog.Raw(string(cursor[cursorIndex]))
+			}
+		}
+	}()
+}
+
+func StopAnimation() {
+
+	if isAnimating {
+		animationDone <- true
+	}
 }

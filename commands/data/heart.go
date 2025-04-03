@@ -29,8 +29,10 @@ func getHeartRate(cmd *cobra.Command, args []string) {
 
 	getRingAddress()
 
+	bspCount = rcLog.Raw("Retrieving data...  ")
+	rcUtils.AnimateCursor()
+
 	// Enable BLE
-	bspCount = rcLog.Raw("Retrieving data...")
 	device := rcBLE.EnableAndConnect(ringAddress)
 	defer rcBLE.Disconnect(device)
 
@@ -76,6 +78,7 @@ func receiveHeartDataSettings(receivedData []byte) {
 func outputHeartData() {
 
 	start, end := "", ""
+	rcUtils.StopAnimation()
 	rcLog.Backspaces(bspCount)
 	rcLog.Report("Heart Data commencing at %s", heartRateData.Timestamp.String())
 	for _, hrdp := range heartRateData.Rates {

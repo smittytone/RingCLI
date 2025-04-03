@@ -16,15 +16,15 @@ CLI access to data stored on the Colmi R02 smart ring.
 
 #### Scan for Rings
 
-At the moment, you require your ring’s BLE address to issue most sub-commands. Obtain it with:
+You require your ring’s BLE address to issue most sub-commands (but see [Bind a Ring](#bind-a-ring)). Obtain it by scanning for rings:
 
 ```shell
 ringcli utils scan --first
 ```
 
-If your ring is in range and powered, you should see it listed and you can copy its address.
+If your ring is in range and powered on (ie. it has been placed the the charger at least once), you should see it listed and you can copy its address.
 
-**Note** The `--first` in the command above causes `ringcli` to halt scanning on the first ring it finds. If you have multiple rings, do not include the `--first` switch. `ringcli` will now list all of them — or, at least, those it can detect in the 60-second scan window.
+**Note** The `--first` in the command above causes `ringcli` to halt scanning on the first ring it finds. If you have multiple rings, do not include the `--first` switch. `ringcli` will now list all of them — or, at least, those it can detect within its 60-second scan window.
 
 #### Set Ring Time
 

@@ -3,6 +3,7 @@ package rcLog
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 const (
@@ -26,6 +27,13 @@ func Raw(msg string, values ...any) int {
 func Backspaces(count int) {
 
 	Raw(CSI + fmt.Sprintf("%dD", count))
+	Raw(strings.Repeat(" ", count))
+	Raw(CSI + fmt.Sprintf("%dD", count))
+}
+
+func Backspace(count int) {
+
+	Raw(CSI + fmt.Sprintf("%dD", count))
 }
 
 func Report(msg string, values ...any) {
@@ -33,15 +41,10 @@ func Report(msg string, values ...any) {
 	log(PLAIN_MESSAGE, msg, values...)
 }
 
-/*
 func ReportWarning(errMsg string, values ...any) {
 
-	// Only report these messages if the Level is WARNING or higher
-	if mvAppConfig.Config.LogLevel >= mvSharedData.LOG_LEVEL_WARN {
-		log(WARNING_MESSAGE, errMsg, values...)
-	}
+	log(WARNING_MESSAGE, errMsg, values...)
 }
-*/
 
 func ReportError(errMsg string, values ...any) {
 
