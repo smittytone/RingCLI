@@ -60,7 +60,7 @@ func ReportDebug(errMsg string, values ...any) {
 
 func ReportErrorAndExit(errCode int, errMsg string, values ...any) {
 
-	log(ERROR_MESSAGE, errMsg, values)
+	log(ERROR_MESSAGE, errMsg, values...)
 	os.Exit(errCode)
 }
 

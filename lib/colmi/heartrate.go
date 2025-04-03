@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"time"
 	// App
+	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
 )
 
 type HeartRateDatapoint struct {
-	Timestamp string
 	Rate      int
+	Time      string
+	Timestamp time.Time
 }
 
 type HeartRateData struct {
@@ -106,7 +108,7 @@ func ParseHeartRateDataResp(packet []byte, minutesInterval int) *HeartRateData {
 	if packet[0] == 0x15 {
 		if packet[1] == 0xFF {
 			// ERROR
-			rcLog.ReportError("Input heart rate data packet malformed")
+			rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_HEART_DATA_REQUEST, "Input heart rate data packet malformed or no data available")
 			return nil
 		}
 
@@ -127,7 +129,7 @@ func ParseHeartRateDataResp(packet []byte, minutesInterval int) *HeartRateData {
 		if packetIndex == 1 {
 			// First four bytes form a timestamp, rest is data TODO
 			ts := (int(packet[5]) << 24) | (int(packet[4]) << 16) | (int(packet[3]) << 8) | int(packet[2])
-			initialTime = time.UnixMilli(int64(ts) * 1000)
+			initialTime = time.UnixMilli(int64(ts) * 1000).UTC()
 			data = append(data, packet[6:15]...)
 			packetIndex += 1
 			return nil
@@ -153,26 +155,26 @@ func ParseHeartRateDataResp(packet []byte, minutesInterval int) *HeartRateData {
 	return nil
 }
 
-func packageData(startTime time.Time, interval int) []HeartRateDatapoint {
+func packageData(startTime time.Time, minuteDelta int) []HeartRateDatapoint {
 
-	count := (len(data) / 6) / 5
-	minuteDelta := interval
-	fmt.Println(count, minuteDelta)
 	results := make([]HeartRateDatapoint, 0, 24)
 	done := false
 	index := 0
-	hour := 0
-	min := 0
+	now := startTime
+	hour := now.Hour()
+	min := now.Minute()
 	for !done {
+		now = startTime.Add(time.Minute*time.Duration(min) + time.Hour*time.Duration(hour))
 		var hrdp HeartRateDatapoint = HeartRateDatapoint{
 			Rate:      int(data[index]),
-			Timestamp: fmt.Sprintf("%02d:%02d", hour, min),
+			Time:      fmt.Sprintf("%02d:%02d", hour, min),
+			Timestamp: now,
 		}
 
 		results = append(results, hrdp)
 
 		min += minuteDelta
-		if min >= 60 {
+		for min >= 60 {
 			min = 60 - min
 			hour += 1
 		}

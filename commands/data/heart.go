@@ -2,22 +2,19 @@ package rcDataCommands
 
 import (
 	"fmt"
-	"time"
-	// External code
 	"github.com/spf13/cobra"
-	"tinygo.org/x/bluetooth"
-	// Library code
 	rcBLE "ringcli/lib/ble"
 	rcColmi "ringcli/lib/colmi"
-	rcErrors "ringcli/lib/errors"
 	rcLog "ringcli/lib/log"
 	rcUtils "ringcli/lib/utils"
+	"time"
+	"tinygo.org/x/bluetooth"
 )
 
 var (
 	heartRateData *rcColmi.HeartRateData
-	dataEnabled bool
-	dataInterval int
+	dataEnabled   bool
+	dataInterval  int
 )
 
 // Define the `heartrate` sub-command.
@@ -30,10 +27,7 @@ var HeartRateCmd = &cobra.Command{
 
 func getHeartRate(cmd *cobra.Command, args []string) {
 
-	// Bail when no ID data is provided
-	if ringAddress == "" {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_PARAMS, "No name or address supplied")
-	}
+	getRingAddress()
 
 	// Enable BLE
 	bspCount = rcLog.Raw("Retrieving data...")
@@ -54,13 +48,12 @@ func requestHeartData(ble bluetooth.Device) {
 
 	// TODO Allow date offset to be added via cli option
 	requestPacket := rcColmi.MakeHeartRateReadReq(rcUtils.StartToday(time.Now().UTC()))
-	fmt.Println(requestPacket)
 	rcBLE.RequestDataViaCommandUART(ble, requestPacket, receiveHeartData, 1)
 }
 
 func receiveHeartData(receivedData []byte) {
 
-	fmt.Println(receivedData)
+	//fmt.Println(receivedData)
 	a := rcColmi.ParseHeartRateDataResp(receivedData, dataInterval)
 	if a != nil {
 		// Got data
@@ -73,16 +66,38 @@ func receiveHeartDataSettings(receivedData []byte) {
 
 	if receivedData[0] == rcColmi.COMMAND_HEART_RATE_PERIOD {
 		// Signal data received
+		var b byte
+		dataEnabled, b = rcColmi.ParseHeartRatePeriodResp(receivedData)
+		dataInterval = int(b)
 		rcBLE.UARTInfoReceived = true
-		dataEnabled, byte = rcColmi.ParseHeartRatePeriodResp(receivedData)
-		dataInterval = int(byte)
 	}
 }
 
 func outputHeartData() {
 
-	rcLog.Report("Heart Data from %s (%d)", heartRateData.Timestamp.String(), len(heartRateData.Rates))
+	start, end := "", ""
+	rcLog.Backspaces(bspCount)
+	rcLog.Report("Heart Data commencing at %s", heartRateData.Timestamp.String())
 	for _, hrdp := range heartRateData.Rates {
-		rcLog.Report("  %d bpm at %s", hrdp.Rate, hrdp.Timestamp)
+		if hrdp.Timestamp.Before(time.Now()) || hrdp.Timestamp.Equal(time.Now()) {
+			if hrdp.Rate == 0 {
+				if start == "" {
+					start = fmt.Sprintf("  Ring not worn from %s to", hrdp.Time)
+				} else {
+					end = hrdp.Time
+				}
+			} else {
+				if start != "" {
+					rcLog.Report("%s %s", start, end)
+					start = ""
+				}
+
+				rcLog.Report("  %d bpm at %s", hrdp.Rate, hrdp.Time)
+			}
+		}
+	}
+
+	if start != "" {
+		rcLog.Report("%s %s", start, end)
 	}
 }

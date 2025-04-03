@@ -24,7 +24,7 @@ func init() {
 
 	// Add required flags: --address
 	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "", "", "The rings's BLE address. Required")
-	HeartRateCmd.MarkFlagRequired("address")
+	//HeartRateCmd.MarkFlagRequired("address")
 }
 
 // Apply the logging Level string, eg. "debug" from the `--log` flag.
