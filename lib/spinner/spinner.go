@@ -36,15 +36,16 @@ func (s *Spinner) Start() {
 	}
 
 	s.timer = time.NewTicker(50 * time.Millisecond)
-	s.isAnimating = true
 	s.progress = make(chan bool)
 	go func() {
 		for {
 			select {
 			case <-s.progress:
+				// Halted
 				s.isAnimating = false
 				return
 			case <-s.timer.C:
+				// Ticker fires
 				s.cursorIndex += 1
 				if s.cursorIndex >= len(s.cursor) {
 					s.cursorIndex = 0
@@ -55,12 +56,14 @@ func (s *Spinner) Start() {
 			}
 		}
 	}()
+	s.isAnimating = true
 }
 
 func (s *Spinner) Stop() {
 
 	if s.isAnimating {
 		s.progress <- true
+		s.isAnimating = false
 	}
 }
 

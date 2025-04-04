@@ -93,6 +93,11 @@ func ReportErrorAndExit(errCode int, errMsg string, values ...any) {
 
 func log(msgType int, msg string, values ...any) {
 
+	if cursorSpinner != nil && cursorSpinner.IsAnimating() {
+		cursorSpinner.Stop()
+		fmt.Fprintf(os.Stderr, "\n")
+	}
+
 	outputMsg := msg
 	if len(values) > 0 {
 		outputMsg = fmt.Sprintf(msg, values...)
