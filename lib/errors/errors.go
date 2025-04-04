@@ -1,4 +1,4 @@
-package rcErrors
+package ringCLI_Errors
 
 const (
 	ERROR_CODE_NONE                     int = 0

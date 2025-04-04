@@ -3,13 +3,14 @@ package rcUtilsCommands
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	rcBLE "ringcli/lib/ble"
-	rcColmi "ringcli/lib/colmi"
-	rcLog "ringcli/lib/log"
-	rcUtils "ringcli/lib/utils"
+	ble "ringcli/lib/ble"
+	ring "ringcli/lib/colmi"
+	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 	"tinygo.org/x/bluetooth"
 )
 
+// Standard record for device information
 type DeviceInfo struct {
 	maker    string
 	firmware string
@@ -17,20 +18,19 @@ type DeviceInfo struct {
 	name     string
 	system   string
 	pnp      string
-	battery  rcColmi.BatteryInfo
+	battery  ring.BatteryInfo
 }
 
 // Globals relevant only to this command
 var (
-	batteryInfoReceived bool       = false
-	deviceInfo          DeviceInfo = DeviceInfo{}
+	deviceInfo DeviceInfo = DeviceInfo{} // Device info record
 )
 
 // Define the `info` subcommand.
 var InfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Get ring info",
-	Long:  "Get ring info",
+	Long:  "Get smart ring information, including battery state.",
 	Run:   getInfo,
 }
 
@@ -39,17 +39,17 @@ func getInfo(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	bspCount = rcLog.Raw("Retrieving ring information...  ")
-	rcUtils.AnimateCursor()
+	bspCount = log.Raw("Retrieving ring information...  ")
+	utils.AnimateCursor()
 
 	// Enable BLE
 	deviceInfo.battery.Level = 0
-	device := rcBLE.EnableAndConnect(ringAddress)
-	defer rcBLE.Disconnect(device)
-	infoService := rcBLE.DeviceInfoService(device)
+	device := ble.EnableAndConnect(ringAddress)
+	defer ble.Disconnect(device)
+	infoService := ble.DeviceInfoService(device)
 
 	// Get the device data
-	requestDeviceInfo(infoService)
+	processDeviceInfo(infoService)
 
 	// Get the battery data
 	requestBatteryInfo(device)
@@ -58,30 +58,31 @@ func getInfo(cmd *cobra.Command, args []string) {
 	outputRingInfo(false)
 }
 
-func requestBatteryInfo(ble bluetooth.Device) {
+func requestBatteryInfo(device bluetooth.Device) {
 
-	requestPacket := rcColmi.MakeBatteryReq()
-	rcBLE.RequestDataViaCommandUART(ble, requestPacket, receiveBatteryInfo, 1)
+	requestPacket := ring.MakeBatteryRequest()
+	ble.RequestDataViaCommandUART(device, requestPacket, receiveBatteryInfo, 1)
 }
 
 func receiveBatteryInfo(receivedData []byte) {
 
-	if receivedData[0] == rcColmi.COMMAND_BATTERY_INFO {
-		deviceInfo.battery = rcColmi.ParseBatteryResp(receivedData)
-		rcBLE.UARTInfoReceived = true
+	if receivedData[0] == ring.COMMAND_BATTERY_INFO {
+		deviceInfo.battery = ring.ParseBatteryResponse(receivedData)
+		ble.UARTInfoReceived = true
 	}
 }
 
-func requestDeviceInfo(service bluetooth.DeviceService) {
+func processDeviceInfo(service bluetooth.DeviceService) {
 
-	uuidvendor := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID)
-	uuidfirmware := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID)
-	uuidhardware := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID)
-	uuidsystemid := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID)
-	uuidpnpid := rcBLE.UUIDFromUInt16(rcBLE.BLE_DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID)
+	// Set the BLE service, characteristic UUIDs
+	uuidvendor := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID)
+	uuidfirmware := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID)
+	uuidhardware := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID)
+	uuidsystemid := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID)
+	uuidpnpid := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID)
 
 	// Get a list of characteristics within the service
-	characteristics := rcBLE.Characteristics(service, []bluetooth.UUID{
+	characteristics := ble.Characteristics(service, []bluetooth.UUID{
 		uuidvendor,
 		uuidfirmware,
 		uuidhardware,
@@ -95,24 +96,16 @@ func requestDeviceInfo(service bluetooth.DeviceService) {
 		_, err := characteristic.Read(data)
 		if err == nil {
 			c := characteristic.UUID()
-
-			if c == uuidvendor {
+			switch c {
+			case uuidvendor:
 				deviceInfo.maker = string(data)
-			}
-
-			if c == uuidfirmware {
+			case uuidfirmware:
 				deviceInfo.firmware = string(data)
-			}
-
-			if c == uuidhardware {
+			case uuidhardware:
 				deviceInfo.hardware = string(data)
-			}
-
-			if c == uuidsystemid {
+			case uuidsystemid:
 				deviceInfo.system = decodeSysId(data)
-			}
-
-			if c == uuidpnpid {
+			case uuidpnpid:
 				deviceInfo.pnp = decodePnP(data)
 			}
 		}
@@ -121,10 +114,10 @@ func requestDeviceInfo(service bluetooth.DeviceService) {
 
 func outputRingInfo(showBatteryOnly bool) {
 
-	rcUtils.StopAnimation()
+	utils.StopAnimation()
 
 	if bspCount > 0 {
-		rcLog.Backspaces(bspCount)
+		log.Backspaces(bspCount)
 	}
 
 	chargeState := "not charging"
@@ -133,16 +126,16 @@ func outputRingInfo(showBatteryOnly bool) {
 	}
 
 	if showBatteryOnly {
-		rcLog.Report("Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
+		log.Report("Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
 		return
 	}
 
-	rcLog.Report("Ring Info:                     ")
-	rcLog.Report("Firmware Version: %s", deviceInfo.firmware)
-	rcLog.Report("Hardware Version: %s", deviceInfo.hardware)
-	rcLog.Report("    Manufacturer: %s", deviceInfo.maker)
-	rcLog.Report("       System ID: %s", deviceInfo.system)
-	rcLog.Report("          PnP ID: %s", deviceInfo.pnp)
+	log.Report("Ring Info:                     ")
+	log.Report("Firmware Version: %s", deviceInfo.firmware)
+	log.Report("Hardware Version: %s", deviceInfo.hardware)
+	log.Report("    Manufacturer: %s", deviceInfo.maker)
+	log.Report("       System ID: %s", deviceInfo.system)
+	log.Report("          PnP ID: %s", deviceInfo.pnp)
 }
 
 func decodePnP(data []byte) string {

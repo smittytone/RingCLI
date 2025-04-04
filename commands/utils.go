@@ -18,12 +18,12 @@ func init() {
 
 	rcUtilsCommand.AddCommand(rcUtilsCommands.BatteryCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.BindCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.SetTimeCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.FindCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.InfoCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.ScanCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.GetHeartRateCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.SetHeartRateCmd)
+	rcUtilsCommand.AddCommand(rcUtilsCommands.InfoCmd)
+	rcUtilsCommand.AddCommand(rcUtilsCommands.ScanCmd)
 	rcUtilsCommand.AddCommand(rcUtilsCommands.ShutdownCmd)
+	rcUtilsCommand.AddCommand(rcUtilsCommands.SetTimeCmd)
 	rootCmd.AddCommand(rcUtilsCommand)
 }

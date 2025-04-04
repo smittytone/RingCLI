@@ -1,16 +1,16 @@
-package rcColmi
+package ringCLI_Colmi
 
 type BatteryInfo struct {
-	Level      int
-	IsCharging bool
+	Level      int  // Battery level as a percentage
+	IsCharging bool // Battery charging state
 }
 
-func MakeBatteryReq() []byte {
+func MakeBatteryRequest() []byte {
 
 	return MakePacket(COMMAND_BATTERY_INFO, make([]byte, 0, 0))
 }
 
-func ParseBatteryResp(packet []byte) BatteryInfo {
+func ParseBatteryResponse(packet []byte) BatteryInfo {
 
 	return BatteryInfo{Level: int(packet[1]), IsCharging: (packet[2] != 0)}
 }

@@ -2,17 +2,18 @@ package rcUtilsCommands
 
 import (
 	"github.com/spf13/cobra"
-	rcBLE "ringcli/lib/ble"
-	rcColmi "ringcli/lib/colmi"
-	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
+	ble "ringcli/lib/ble"
+	ring "ringcli/lib/colmi"
+	errors "ringcli/lib/errors"
+	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 )
 
 // Globals relevant only to this command
 var (
-	heartRateEnableSet  bool = false
-	heartRateDisableSet bool = false
-	heartRatePeriod     int  = 60
+	heartRateEnableSet  bool = false // User has asked to enable heart rate monitoring
+	heartRateDisableSet bool = false // User has asked to disable heart rate monitoring
+	heartRatePeriod     int  = 60    // Heart rate monitoring period
 )
 
 // Define the `setheartrate` sub-command.
@@ -38,7 +39,7 @@ func setHeartRatePeriod(cmd *cobra.Command, args []string) {
 
 	// Check params: period in minutes
 	if heartRatePeriod < 0 || heartRatePeriod > 255 {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_PARAMS, "Heart rate reading period out of range (0-255 minutes)")
+		log.ReportErrorAndExit(errors.ERROR_CODE_BAD_PARAMS, "Heart rate reading period out of range (0-255 minutes)")
 	}
 
 	// Check params: enable periodic readings, default to `true`
@@ -59,10 +60,13 @@ func setHeartRatePeriod(cmd *cobra.Command, args []string) {
 		heartRatePeriod = 60
 	}
 
+	bspCount = log.Raw("Setting heart rate monitoring state...  ")
+	utils.AnimateCursor()
+
 	// Enable BLE
-	device := rcBLE.EnableAndConnect(ringAddress)
-	defer rcBLE.Disconnect(device)
-	rcBLE.RequestDataViaCommandUART(device, rcColmi.MakeHeartRatePeriodSetReq(enabled, byte(heartRatePeriod)), heartRatePeriodPacketReceived, 1)
+	device := ble.EnableAndConnect(ringAddress)
+	defer ble.Disconnect(device)
+	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodSetRequest(enabled, byte(heartRatePeriod)), receiveHeartRatePeriod, 1)
 }
 
 func getHeartRatePeriod(cmd *cobra.Command, args []string) {
@@ -70,31 +74,37 @@ func getHeartRatePeriod(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
+	bspCount = log.Raw("Getting heart rate monitoring state...  ")
+	utils.AnimateCursor()
+
 	// Enable BLE
-	device := rcBLE.EnableAndConnect(ringAddress)
-	defer rcBLE.Disconnect(device)
-	rcBLE.RequestDataViaCommandUART(device, rcColmi.MakeHeartRatePeriodGetReq(), heartRatePeriodPacketReceived, 1)
+	device := ble.EnableAndConnect(ringAddress)
+	defer ble.Disconnect(device)
+	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartRatePeriod, 1)
 }
 
-func heartRatePeriodPacketReceived(receivedData []byte) {
+func receiveHeartRatePeriod(receivedData []byte) {
 
-	if receivedData[0] == rcColmi.COMMAND_HEART_RATE_PERIOD {
-		// Signal data received
-		rcBLE.UARTInfoReceived = true
+	if receivedData[0] == ring.COMMAND_HEART_RATE_PERIOD {
+		utils.StopAnimation()
 
 		// Parse and report received data
-		enabled, period := rcColmi.ParseHeartRatePeriodResp(receivedData)
+		enabled, period := ring.ParseHeartRatePeriodResponse(receivedData)
 		enabledString := "enabled"
 		if !enabled {
 			enabledString = "disabled"
 		}
 
-		rcLog.Report("Periodic heart rate monitoring is %s", enabledString)
+		log.Backspace(bspCount)
+		log.Report("Periodic heart rate monitoring is %s", enabledString)
 
 		// Only output period if periodic readings are enabled and we're making a GET request
 		// NOTE Interval not included on a SET request for some reason
 		if enabled && receivedData[1] == 1 {
-			rcLog.Report("Readings taken every %d minutes", period)
+			log.Report("Readings taken every %d minutes", period)
 		}
+
+		// Signal data received
+		ble.UARTInfoReceived = true
 	}
 }

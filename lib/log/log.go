@@ -1,4 +1,4 @@
-package rcLog
+package ringCLI_Log
 
 import (
 	"fmt"

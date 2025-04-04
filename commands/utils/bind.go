@@ -2,22 +2,22 @@ package rcUtilsCommands
 
 import (
 	"github.com/spf13/cobra"
-	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
-	rcUtils "ringcli/lib/utils"
+	errors "ringcli/lib/errors"
+	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 )
 
 // Globals relevant only to this command
 var (
-	doOverwrite bool = false
-	doShow      bool = false
+	doOverwrite bool = false // Overwrite an existing address
+	doShow      bool = false // Display the binding, if present
 )
 
 // Define the `bind` subcommand.
 var BindCmd = &cobra.Command{
 	Use:   "bind",
-	Short: "Store a ring address",
-	Long:  "Store a ring's address.",
+	Short: "Store a ring BLE address",
+	Long:  "Persist your ring's BLE address across commands.",
 	Run:   bindRing,
 }
 
@@ -25,21 +25,21 @@ func bindRing(cmd *cobra.Command, args []string) {
 
 	if doShow {
 		// Just show binding info
-		ringAddress = rcUtils.GetStoredRingAddress()
+		ringAddress = utils.GetStoredRingAddress()
 		if ringAddress != "" {
-			rcLog.Report("Ring %s is currently bound", ringAddress)
+			log.Report("Ring %s is currently bound", ringAddress)
 		} else {
-			rcLog.Report("No ring bound")
+			log.Report("No ring bound")
 		}
 	} else {
 		// Set binding
 		if ringAddress == "" {
 			// Bail when no ring address has been provided
-			rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_PARAMS, "No address supplied")
+			log.ReportErrorAndExit(errors.ERROR_CODE_BAD_PARAMS, "No address supplied")
 		}
 
 		// Write out the binding for future use
-		rcUtils.MakeBinding(ringAddress, doOverwrite)
-		rcLog.Report("Ring %s bound", ringAddress)
+		utils.MakeBinding(ringAddress, doOverwrite)
+		log.Report("Ring %s bound", ringAddress)
 	}
 }

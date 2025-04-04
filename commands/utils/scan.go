@@ -3,9 +3,10 @@ package rcUtilsCommands
 import (
 	"github.com/spf13/cobra"
 	"os"
-	rcBLE "ringcli/lib/ble"
-	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
+	ble "ringcli/lib/ble"
+	errors "ringcli/lib/errors"
+	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 	"strings"
 	"time"
 	"tinygo.org/x/bluetooth"
@@ -17,10 +18,10 @@ const (
 
 // Globals relevant only to this command
 var (
-	rings            map[string]string = make(map[string]string)
-	devices          map[string]string = make(map[string]string)
-	scanTimer        *time.Timer
-	scanForFirstRing bool = false
+	rings            map[string]string = make(map[string]string) // Dictionary of rings. Key is BLE address
+	devices          map[string]string = make(map[string]string) // Dictionary of other devices. Key is BLE address. Debug only
+	scanTimer        *time.Timer                                 // Scan window timer
+	scanForFirstRing bool              = false                   // Stop scanning on first ring found
 )
 
 // Define the `scan` subcommand.
@@ -33,29 +34,31 @@ var ScanCmd = &cobra.Command{
 
 func doScan(cmd *cobra.Command, args []string) {
 
-	bspCount = rcLog.Raw("Scanning...")
+	bspCount = log.Raw("Scanning...  ")
+	utils.AnimateCursor()
 
 	// Enable BLE
-	ble := rcBLE.Open()
+	radio := ble.Open()
 
 	// Establish a timer for the scan
 	scanTimer = time.NewTimer(SCAN_TIMEOUT_S * time.Second)
 	defer scanTimer.Stop()
 	go func() {
 		<-scanTimer.C
-		exitCode := rcErrors.ERROR_CODE_SCAN_TIMEOUT
+		utils.StopAnimation()
+		exitCode := errors.ERROR_CODE_SCAN_TIMEOUT
 		if len(rings) > 0 {
-			// We have one or more rings, so display their data
+			// We have one or more rings, so display their data before exiting
 			printFoundRings()
-			exitCode = rcErrors.ERROR_CODE_NONE
+			exitCode = errors.ERROR_CODE_NONE
 		} else {
-			rcLog.ReportError("Scan timed out and no rings found")
+			log.ReportError("Scan timed out and no rings found")
 		}
 
 		// Display de-duped list of other BLE devices on debug runs
 		if debug && len(devices) > 0 {
 			for address, name := range devices {
-				rcLog.Report("Device %s with BLE address $s", name, address)
+				log.Report("Device %s with BLE address $s", name, address)
 			}
 		}
 
@@ -63,7 +66,7 @@ func doScan(cmd *cobra.Command, args []string) {
 	}()
 
 	// Setup done, so initiate a scan
-	rcBLE.BeginScan(ble, onScan)
+	ble.BeginScan(radio, onScan)
 }
 
 func onScan(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
@@ -80,8 +83,9 @@ func onScan(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 
 		if scanForFirstRing {
 			scanTimer.Stop()
+			utils.StopAnimation()
 			printFoundRings()
-			os.Exit(rcErrors.ERROR_CODE_NONE)
+			os.Exit(errors.ERROR_CODE_NONE)
 		}
 	} else if debug {
 		// Only note other devices on debug runs
@@ -97,10 +101,11 @@ func onScan(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 
 func printFoundRings() {
 
-	rcLog.Backspaces(bspCount)
+	log.Backspaces(bspCount)
+
 	if len(rings) > 0 {
 		for address, name := range rings {
-			rcLog.Report("Ring found: %s with BLE address %s", name, address)
+			log.Report("Ring found: %s with BLE address %s", name, address)
 		}
 	}
 }

@@ -1,6 +1,6 @@
-package rcColmi
+package ringCLI_Colmi
 
-func MakeLedFlashReq() []byte {
+func MakeLedFlashRequest() []byte {
 
 	return MakePacket(COMMAND_BATTERY_FLASH_LED, make([]byte, 0, 0))
 }

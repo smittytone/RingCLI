@@ -1,4 +1,4 @@
-package rcColmi
+package ringCLI_Colmi
 
 type DateStamp struct {
 	Year      int
@@ -24,7 +24,7 @@ var (
 	doScaleCalories bool = false
 )
 
-func MakeStepsReq(offset int) []byte {
+func MakeStepsRequest(offset int) []byte {
 
 	// Make sure the offset is within byte range
 	if offset < -128 || offset > 127 {
@@ -34,7 +34,7 @@ func MakeStepsReq(offset int) []byte {
 	return MakePacket(COMMAND_GET_ACTIVITY_DATA, []byte{byte(offset), 0x0F, 0x00, 0x5F, 0x01})
 }
 
-func ParseStepsResp(packet []byte) SportsInfo {
+func ParseStepsResponse(packet []byte) SportsInfo {
 
 	/* SAMPLE
 	[67  240 12 1 0 0 0 0 0 0 0 0 0 0 0 64]

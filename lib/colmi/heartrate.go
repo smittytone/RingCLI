@@ -1,25 +1,26 @@
-package rcColmi
+package ringCLI_Colmi
 
 import (
 	"encoding/binary"
 	"fmt"
 	"time"
 	// App
-	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
+	errors "ringcli/lib/errors"
+	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 )
 
 type HeartRateDatapoint struct {
 	Rate      int
-	Time      string
-	Timestamp time.Time
+	Timestamp string
+	Time      time.Time
 }
 
 type HeartRateData struct {
 	Rates     []HeartRateDatapoint
 	DataRange int
 	Raw       []byte
-	Timestamp time.Time
+	Time      time.Time
 }
 
 var (
@@ -30,12 +31,12 @@ var (
 	data        []byte
 )
 
-func MakeHeartRatePeriodGetReq() []byte {
+func MakeHeartRatePeriodGetRequest() []byte {
 
 	return MakePacket(COMMAND_HEART_RATE_PERIOD, []byte{0x01})
 }
 
-func MakeHeartRatePeriodSetReq(isEnabled bool, period byte) []byte {
+func MakeHeartRatePeriodSetRequest(isEnabled bool, period byte) []byte {
 
 	// Set the byte value for the enabling flag
 	var enabledValue byte = 1
@@ -47,7 +48,7 @@ func MakeHeartRatePeriodSetReq(isEnabled bool, period byte) []byte {
 	return MakePacket(COMMAND_HEART_RATE_PERIOD, payload)
 }
 
-func MakeHeartRateReadReq(target time.Time) []byte {
+func MakeHeartRateReadRequest(target time.Time) []byte {
 
 	payload := make([]byte, 4, 4)
 	timestamp := uint32(target.UnixMilli() / 1000)
@@ -55,7 +56,7 @@ func MakeHeartRateReadReq(target time.Time) []byte {
 	return MakePacket(COMMAND_HEART_RATE_READ, payload)
 }
 
-func ParseHeartRatePeriodResp(packet []byte) (bool, byte) {
+func ParseHeartRatePeriodResponse(packet []byte) (bool, byte) {
 
 	/* SAMPLE SET
 	[22 2 1 0 0 0 0 0 0 0 0 0 0 0 0 25]
@@ -76,7 +77,7 @@ func ParseHeartRatePeriodResp(packet []byte) (bool, byte) {
 	return false, 0
 }
 
-func ParseHeartRateDataResp(packet []byte, minutesInterval int) *HeartRateData {
+func ParseHeartRateDataResponse(packet []byte, minutesInterval int) *HeartRateData {
 
 	/* SAMPLE
 	[21 0 24 5 0 0 0 0 0 0 0 0 0 0 0 50]
@@ -105,15 +106,15 @@ func ParseHeartRateDataResp(packet []byte, minutesInterval int) *HeartRateData {
 	[21 23 0 0 0 0 0 0 0 0 0 0 0 0 0 44]
 	*/
 
-	if packet[0] == 0x15 {
-		if packet[1] == 0xFF {
-			// ERROR
-			rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_HEART_DATA_REQUEST, "Input heart rate data packet malformed or no data available")
+	if packet[0] == COMMAND_HEART_RATE_READ {
+		if packet[1] == COMMAND_ERROR {
+			utils.StopAnimation()
+			log.ReportErrorAndExit(errors.ERROR_CODE_BAD_HEART_DATA_REQUEST, "Input heart rate data packet malformed or no data available")
 			return nil
 		}
 
 		if !VerifyChecksum(packet) {
-			rcLog.ReportError("Checksum fail")
+			log.ReportError("Checksum fail")
 		}
 
 		// Header packet
@@ -142,10 +143,10 @@ func ParseHeartRateDataResp(packet []byte, minutesInterval int) *HeartRateData {
 		if int(packet[1]) == lastPacket {
 			// Return data
 			hrd = HeartRateData{
-				Rates:     packageData(initialTime, minutesInterval),
+				Rates:     packageHeartRateData(initialTime, minutesInterval),
 				DataRange: packetRange,
 				Raw:       data,
-				Timestamp: initialTime,
+				Time:      initialTime,
 			}
 
 			return &hrd
@@ -155,7 +156,7 @@ func ParseHeartRateDataResp(packet []byte, minutesInterval int) *HeartRateData {
 	return nil
 }
 
-func packageData(startTime time.Time, minuteDelta int) []HeartRateDatapoint {
+func packageHeartRateData(startTime time.Time, minuteDelta int) []HeartRateDatapoint {
 
 	results := make([]HeartRateDatapoint, 0, 24)
 	done := false
@@ -167,8 +168,8 @@ func packageData(startTime time.Time, minuteDelta int) []HeartRateDatapoint {
 		now = startTime.Add(time.Minute*time.Duration(min) + time.Hour*time.Duration(hour))
 		var hrdp HeartRateDatapoint = HeartRateDatapoint{
 			Rate:      int(data[index]),
-			Time:      fmt.Sprintf("%02d:%02d", hour, min),
-			Timestamp: now,
+			Timestamp: fmt.Sprintf("%02d:%02d", hour, min),
+			Time:      now,
 		}
 
 		results = append(results, hrdp)
@@ -179,7 +180,7 @@ func packageData(startTime time.Time, minuteDelta int) []HeartRateDatapoint {
 			hour += 1
 		}
 
-		index += 6
+		index += 6 // Number is magic - what is it? Just proprietary, or 'interval' plus one?
 		done = index >= len(data)
 	}
 

@@ -2,17 +2,17 @@ package rcDataCommands
 
 import (
 	"github.com/spf13/cobra"
-	rcBLE "ringcli/lib/ble"
-	rcColmi "ringcli/lib/colmi"
-	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
-	rcUtils "ringcli/lib/utils"
+	ble "ringcli/lib/ble"
+	ring "ringcli/lib/colmi"
+	errors "ringcli/lib/errors"
+	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 	"tinygo.org/x/bluetooth"
 )
 
 // Globals relevant only to this command
 var (
-	activityTotals rcColmi.SportsInfo
+	activityTotals ring.SportsInfo // Values combined from individual records
 )
 
 // Define the `steps` sub-command.
@@ -28,12 +28,12 @@ func getSteps(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	bspCount = rcLog.Raw("Retrieving data...")
-	rcUtils.AnimateCursor()
+	bspCount = log.Raw("Retrieving activity data...  ")
+	utils.AnimateCursor()
 
 	// Enable BLE
-	device := rcBLE.EnableAndConnect(ringAddress)
-	defer rcBLE.Disconnect(device)
+	device := ble.EnableAndConnect(ringAddress)
+	defer ble.Disconnect(device)
 
 	// Get the activity data
 	requestSportsInfo(device)
@@ -42,31 +42,31 @@ func getSteps(cmd *cobra.Command, args []string) {
 	outputStepsInfo()
 }
 
-func requestSportsInfo(ble bluetooth.Device) {
+func requestSportsInfo(device bluetooth.Device) {
 
 	// TODO Allow date offset to be added via cli option
-	requestPacket := rcColmi.MakeStepsReq(0)
+	requestPacket := ring.MakeStepsRequest(0)
 	if requestPacket == nil {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_ACTIVITY_TIME_OFFSET, "Date offset out of range")
+		log.ReportErrorAndExit(errors.ERROR_CODE_BAD_ACTIVITY_TIME_OFFSET, "Date offset out of range")
 	}
 
-	activityTotals = rcColmi.SportsInfo{}
-	rcBLE.RequestDataViaCommandUART(ble, requestPacket, receiveSportsInfo, 1)
+	activityTotals = ring.SportsInfo{}
+	ble.RequestDataViaCommandUART(device, requestPacket, receiveSportsInfo, 1)
 }
 
 func receiveSportsInfo(receivedData []byte) {
 
-	if receivedData[0] == 0x73 {
+	if receivedData[0] == ring.COMMAND_GET_ACTIVITY_UNKNOWN {
 		// Completion notice???
-		rcBLE.UARTInfoReceived = true
+		ble.UARTInfoReceived = true
 	}
 
 	// Check we have a SportsInfo response
-	if receivedData[0] == rcColmi.COMMAND_GET_ACTIVITY_DATA {
-		info := rcColmi.ParseStepsResp(receivedData)
+	if receivedData[0] == ring.COMMAND_GET_ACTIVITY_DATA {
+		info := ring.ParseStepsResponse(receivedData)
 		if info.NoData {
 			// Mark as done
-			rcBLE.UARTInfoReceived = true
+			ble.UARTInfoReceived = true
 			return
 		}
 
@@ -84,31 +84,31 @@ func receiveSportsInfo(receivedData []byte) {
 		//now := time.Now().Hour() * 4
 		if info.IsDone {
 			// Completion notice -- but we'll probably have timed out before this
-			rcBLE.UARTInfoReceived = true
+			ble.UARTInfoReceived = true
 		}
 	}
 }
 
 func outputStepsInfo() {
 
-	rcUtils.StopAnimation()
-	rcLog.Backspaces(bspCount)
+	utils.StopAnimation()
+	log.Backspaces(bspCount)
 
 	// Output...
-	rcLog.Report("Activity Info: %d/%d/%d %02d:%02d", activityTotals.Timestamp.Day, activityTotals.Timestamp.Month, activityTotals.Timestamp.Year, activityTotals.Timestamp.Hour, activityTotals.Timestamp.Minutes)
-	rcLog.Report("         Steps: %d", activityTotals.Steps)
+	log.Report("Activity Info for %d %s %d:", activityTotals.Timestamp.Day, utils.StringifyMonth(activityTotals.Timestamp.Month), activityTotals.Timestamp.Year)
+	log.Report("         Steps: %d", activityTotals.Steps)
 
 	// Check for later, alternative calories scaling
 	if activityTotals.NewCalories {
-		rcLog.Report("      Calories: %.02f kCal", float32(activityTotals.Calories)/1000)
+		log.Report("      Calories: %.02f kCal", float32(activityTotals.Calories)/1000)
 	} else {
-		rcLog.Report("      Calories: %d kCal", activityTotals.Calories)
+		log.Report("      Calories: %d kCal", activityTotals.Calories)
 	}
 
 	// Adjust for range of movement order of magnitude
 	if activityTotals.Distance > 999 {
-		rcLog.Report("Distance Moved: %.02f km", float32(activityTotals.Distance)/1000)
+		log.Report("Distance Moved: %.02f km", float32(activityTotals.Distance)/1000)
 	} else {
-		rcLog.Report("Distance Moved: %d m", activityTotals.Distance)
+		log.Report("Distance Moved: %d m", activityTotals.Distance)
 	}
 }

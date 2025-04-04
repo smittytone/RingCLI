@@ -1,4 +1,4 @@
-package rcColmi
+package ringCLI_Colmi
 
 import (
 	rcLog "ringcli/lib/log"

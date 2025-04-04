@@ -3,18 +3,18 @@ package rcDataCommands
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	rcBLE "ringcli/lib/ble"
-	rcColmi "ringcli/lib/colmi"
-	rcLog "ringcli/lib/log"
-	rcUtils "ringcli/lib/utils"
+	ble "ringcli/lib/ble"
+	ring "ringcli/lib/colmi"
+	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
 
 var (
-	heartRateData *rcColmi.HeartRateData
-	dataEnabled   bool
-	dataInterval  int
+	heartRateData *ring.HeartRateData // Pointer to received heart rate log data
+	dataEnabled   bool                // Heart rate data monitoring is enabled
+	dataInterval  int                 // Heart rate data monitoring time interval eg. 30 minutes
 )
 
 // Define the `heartrate` sub-command.
@@ -27,17 +27,18 @@ var HeartRateCmd = &cobra.Command{
 
 func getHeartRate(cmd *cobra.Command, args []string) {
 
+	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	bspCount = rcLog.Raw("Retrieving data...  ")
-	rcUtils.AnimateCursor()
+	bspCount = log.Raw("Retrieving heart rate data...  ")
+	utils.AnimateCursor()
 
 	// Enable BLE
-	device := rcBLE.EnableAndConnect(ringAddress)
-	defer rcBLE.Disconnect(device)
+	device := ble.EnableAndConnect(ringAddress)
+	defer ble.Disconnect(device)
 
-	// Get the data interval
-	rcBLE.RequestDataViaCommandUART(device, rcColmi.MakeHeartRatePeriodGetReq(), receiveHeartDataSettings, 1)
+	// Get the data interval -- we'll use this to parse the received data
+	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartDataSettings, 1)
 
 	// Get the activity data
 	requestHeartData(device)
@@ -46,62 +47,65 @@ func getHeartRate(cmd *cobra.Command, args []string) {
 	outputHeartData()
 }
 
-func requestHeartData(ble bluetooth.Device) {
+func receiveHeartDataSettings(receivedData []byte) {
 
-	// TODO Allow date offset to be added via cli option
-	requestPacket := rcColmi.MakeHeartRateReadReq(rcUtils.StartToday(time.Now().UTC()))
-	rcBLE.RequestDataViaCommandUART(ble, requestPacket, receiveHeartData, 1)
+	if receivedData[0] == ring.COMMAND_HEART_RATE_PERIOD {
+		// Extract and type the received data
+		var b byte
+		dataEnabled, b = ring.ParseHeartRatePeriodResponse(receivedData)
+		dataInterval = int(b)
+
+		// Signal data received
+		ble.UARTInfoReceived = true
+	}
+}
+
+func requestHeartData(device bluetooth.Device) {
+
+	// TODO Allow date offset to be added via CLI option
+	requestPacket := ring.MakeHeartRateReadRequest(utils.StartToday(time.Now().UTC()))
+	ble.RequestDataViaCommandUART(device, requestPacket, receiveHeartData, 1)
 }
 
 func receiveHeartData(receivedData []byte) {
 
-	//fmt.Println(receivedData)
-	a := rcColmi.ParseHeartRateDataResp(receivedData, dataInterval)
-	if a != nil {
+	data := ring.ParseHeartRateDataResponse(receivedData, dataInterval)
+	if data != nil {
 		// Got data
-		rcBLE.UARTInfoReceived = true
-		heartRateData = a
-	}
-}
+		heartRateData = data
 
-func receiveHeartDataSettings(receivedData []byte) {
-
-	if receivedData[0] == rcColmi.COMMAND_HEART_RATE_PERIOD {
 		// Signal data received
-		var b byte
-		dataEnabled, b = rcColmi.ParseHeartRatePeriodResp(receivedData)
-		dataInterval = int(b)
-		rcBLE.UARTInfoReceived = true
+		ble.UARTInfoReceived = true
 	}
 }
 
 func outputHeartData() {
 
-	start, end := "", ""
-	rcUtils.StopAnimation()
-	rcLog.Backspaces(bspCount)
-	rcLog.Report("Heart Data commencing at %s", heartRateData.Timestamp.String())
+	noDataMessageStart, noDataMessageEnd := "", ""
+	utils.StopAnimation()
+	log.Backspaces(bspCount)
+	log.Report("Heart Data commencing at %s", heartRateData.Time.String())
 	for _, hrdp := range heartRateData.Rates {
-		if hrdp.Timestamp.Before(time.Now()) || hrdp.Timestamp.Equal(time.Now()) {
+		if hrdp.Time.Before(time.Now()) || hrdp.Time.Equal(time.Now()) {
 			if hrdp.Rate == 0 {
-				if start == "" {
-					start = fmt.Sprintf("  Ring not worn or no data available from %s to", hrdp.Time)
+				if noDataMessageStart == "" {
+					noDataMessageStart = fmt.Sprintf("  Ring not worn or no data available from %s to", hrdp.Timestamp)
 				} else {
-					end = hrdp.Time
+					noDataMessageEnd = hrdp.Timestamp
 				}
 			} else {
-				if start != "" {
-					rcLog.Report("%s %s (UTC)", start, end)
-					start = ""
-					end = "now"
+				if noDataMessageStart != "" {
+					log.Report("%s %s (UTC)", noDataMessageStart, noDataMessageEnd)
+					noDataMessageStart = ""
+					noDataMessageEnd = "now"
 				}
 
-				rcLog.Report("  %d bpm at %s (UTC)", hrdp.Rate, hrdp.Time)
+				log.Report("  %d bpm at %s (UTC)", hrdp.Rate, hrdp.Timestamp)
 			}
 		}
 	}
 
-	if start != "" {
-		rcLog.Report("%s %s (UTC)", start, end)
+	if noDataMessageStart != "" {
+		log.Report("%s %s (UTC)", noDataMessageStart, noDataMessageEnd)
 	}
 }

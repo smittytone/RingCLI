@@ -1,12 +1,11 @@
-package rcUtils
+package ringCLI_Utils
 
 import (
 	"os"
 	"path/filepath"
+	errors "ringcli/lib/errors"
+	log "ringcli/lib/log"
 	"time"
-	// App
-	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
 )
 
 const (
@@ -43,7 +42,7 @@ func GetStoredRingAddress() string {
 	bytes, err := os.ReadFile(store)
 	if err != nil {
 		// Store exists but read failed
-		rcLog.ReportError("Could not read bound ring address")
+		log.ReportError("Could not read bound ring address")
 		return ""
 	}
 
@@ -77,7 +76,7 @@ func MakeBinding(address string, overwrite bool) {
 	// Check and make if necessary the store directory
 	bindingStoreDirectory, err := createStoreDirectory()
 	if err != nil {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BINDING_FILE_ERROR, "Could not create the binding store directory (%s)", err)
+		log.ReportErrorAndExit(errors.ERROR_CODE_BINDING_FILE_ERROR, "Could not create the binding store directory (%s)", err)
 	}
 
 	// Check if the store itself is present
@@ -85,21 +84,21 @@ func MakeBinding(address string, overwrite bool) {
 	_, err = os.Stat(bindingStore)
 	if err == nil && !overwrite {
 		// The store is present but the user has not marked the operation with `--overwrite`
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BINDING_FILE_ERROR, "Binding already present. Use --overwrite to replace it")
+		log.ReportErrorAndExit(errors.ERROR_CODE_BINDING_FILE_ERROR, "Binding already present. Use --overwrite to replace it")
 	}
 
 	// Write out a fresh or replacement binding
 	fileData := []byte(address)
 	err = os.WriteFile(bindingStore, fileData, 0644)
 	if err != nil {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BINDING_FILE_ERROR, "Could not store binding")
+		log.ReportErrorAndExit(errors.ERROR_CODE_BINDING_FILE_ERROR, "Could not store binding")
 	}
 }
 
 func ToBCD(data int) byte {
 
 	if data > 99 || data < 0 {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_BCD_INPUT_VALUE, "Unsuitable value for BCD conversion")
+		log.ReportErrorAndExit(errors.ERROR_CODE_BAD_BCD_INPUT_VALUE, "Unsuitable value for BCD conversion")
 	}
 
 	return byte(((data / 10) << 4) | (data % 10))
@@ -118,7 +117,6 @@ func AnimateCursor() {
 		for {
 			select {
 			case <-animationDone:
-				//rcLog.Backspaces(1)
 				isAnimating = false
 				return
 			case <-animationTimer.C:
@@ -127,8 +125,8 @@ func AnimateCursor() {
 					cursorIndex = 0
 				}
 
-				rcLog.Backspace(1)
-				_ = rcLog.Raw(string(cursor[cursorIndex]))
+				log.Backspace(1)
+				_ = log.Raw(string(cursor[cursorIndex]))
 			}
 		}
 	}()
@@ -139,4 +137,15 @@ func StopAnimation() {
 	if isAnimating {
 		animationDone <- true
 	}
+}
+
+func IsAnimating() bool {
+
+	return isAnimating
+}
+
+func StringifyMonth(month int) string {
+
+	months := []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+	return months[month-1]
 }

@@ -1,4 +1,4 @@
-package rcColmi
+package ringCLI_Colmi
 
 import (
 	rcErrors "ringcli/lib/errors"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func MakeTimeSetReq(targetDate time.Time) []byte {
+func MakeTimeSetRequest(targetDate time.Time) []byte {
 
 	payload := makeTimeReqPayload(targetDate)
 	return MakePacket(COMMAND_SET_TIME, payload)
@@ -17,7 +17,6 @@ func makeTimeReqPayload(targetDate time.Time) []byte {
 
 	timezone, _ := targetDate.Zone()
 	if timezone != "UTC" {
-		rcLog.Report("Converting local time to UTC")
 		targetDate = targetDate.UTC()
 	}
 
