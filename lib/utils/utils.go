@@ -1,4 +1,4 @@
-package ringCLI_Utils
+package ringcliUtils
 
 import (
 	"os"
@@ -6,17 +6,6 @@ import (
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
 	"time"
-)
-
-const (
-	cursor string = "|/-\\"
-)
-
-var (
-	animationTimer *time.Ticker
-	isAnimating    bool = false
-	animationDone  chan bool
-	cursorIndex    int = 0
 )
 
 func StartToday(date time.Time) time.Time {
@@ -95,53 +84,16 @@ func MakeBinding(address string, overwrite bool) {
 	}
 }
 
-func ToBCD(data int) byte {
+func ToBCD(data int) (byte, error) {
 
 	if data > 99 || data < 0 {
-		log.ReportErrorAndExit(errors.ERROR_CODE_BAD_BCD_INPUT_VALUE, "Unsuitable value for BCD conversion")
-	}
-
-	return byte(((data / 10) << 4) | (data % 10))
-}
-
-func AnimateCursor() {
-
-	if isAnimating {
-		return
-	}
-
-	animationTimer = time.NewTicker(50 * time.Millisecond)
-	isAnimating = true
-	animationDone = make(chan bool)
-	go func() {
-		for {
-			select {
-			case <-animationDone:
-				isAnimating = false
-				return
-			case <-animationTimer.C:
-				cursorIndex += 1
-				if cursorIndex >= len(cursor) {
-					cursorIndex = 0
-				}
-
-				log.Backspace(1)
-				_ = log.Raw(string(cursor[cursorIndex]))
-			}
+		return 0, &errors.RingcliError{
+			Message: "Unsuitable value for BCD conversion",
+			Code:    errors.ERROR_CODE_BAD_BCD_INPUT_VALUE,
 		}
-	}()
-}
-
-func StopAnimation() {
-
-	if isAnimating {
-		animationDone <- true
 	}
-}
 
-func IsAnimating() bool {
-
-	return isAnimating
+	return byte(((data / 10) << 4) | (data % 10)), nil
 }
 
 func StringifyMonth(month int) string {

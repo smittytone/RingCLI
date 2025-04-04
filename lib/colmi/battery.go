@@ -1,4 +1,4 @@
-package ringCLI_Colmi
+package ringcliColmi
 
 type BatteryInfo struct {
 	Level      int  // Battery level as a percentage

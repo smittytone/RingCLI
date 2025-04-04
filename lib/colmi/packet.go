@@ -1,7 +1,7 @@
-package ringCLI_Colmi
+package ringcliColmi
 
 import (
-	rcLog "ringcli/lib/log"
+	log "ringcli/lib/log"
 )
 
 func MakePacket(command byte, data []byte) []byte {
@@ -11,7 +11,7 @@ func MakePacket(command byte, data []byte) []byte {
 
 	if len(data) > 0 {
 		if len(data) > 14 {
-			rcLog.ReportErrorAndExit(3, "Colmi packet payload must be 14 bytes or less")
+			log.ReportErrorAndExit(3, "Colmi packet payload must be 14 bytes or less")
 		}
 
 		for i := range len(data) {

@@ -1,9 +1,10 @@
-package ringCLI_Colmi
+package ringcliColmi
 
 import (
+	"errors"
 	rcErrors "ringcli/lib/errors"
-	rcLog "ringcli/lib/log"
-	rcUtils "ringcli/lib/utils"
+	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 	"time"
 )
 
@@ -21,16 +22,27 @@ func makeTimeReqPayload(targetDate time.Time) []byte {
 	}
 
 	if targetDate.Year() <= 2000 {
-		rcLog.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_SET_TIME, "Supplied time out of range (must be 2001 or greater)")
+		log.ReportErrorAndExit(rcErrors.ERROR_CODE_BAD_SET_TIME, "Supplied time out of range (must be 2001 or greater)")
 	}
 
 	payload := make([]byte, 7, 7)
-	payload[0] = rcUtils.ToBCD(targetDate.Year() % 2000)
-	payload[1] = rcUtils.ToBCD(int(targetDate.Month()))
-	payload[2] = rcUtils.ToBCD(targetDate.Day())
-	payload[3] = rcUtils.ToBCD(targetDate.Hour())
-	payload[4] = rcUtils.ToBCD(targetDate.Minute())
-	payload[5] = rcUtils.ToBCD(targetDate.Second())
+	payload[0] = makePayloadByte(targetDate.Year() % 2000)
+	payload[1] = makePayloadByte(int(targetDate.Month()))
+	payload[2] = makePayloadByte(targetDate.Day())
+	payload[3] = makePayloadByte(targetDate.Hour())
+	payload[4] = makePayloadByte(targetDate.Minute())
+	payload[5] = makePayloadByte(targetDate.Second())
 	payload[6] = LANGUAGE_ENGLISH
 	return payload
+}
+
+func makePayloadByte(value int) byte {
+
+	var ringError *rcErrors.RingcliError
+	result, err := utils.ToBCD(value)
+	if err != nil && errors.As(err, &ringError) {
+		log.ReportErrorAndExit(ringError.Code, ringError.Message)
+	}
+
+	return result
 }

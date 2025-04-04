@@ -5,7 +5,6 @@ import (
 	ble "ringcli/lib/ble"
 	ring "ringcli/lib/colmi"
 	log "ringcli/lib/log"
-	utils "ringcli/lib/utils"
 	"time"
 )
 
@@ -22,8 +21,7 @@ func setTime(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	bspCount = log.Raw("Setting your ring's date and time...  ")
-	utils.AnimateCursor()
+	log.Prompt("Setting your ring's date and time")
 
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
@@ -31,14 +29,13 @@ func setTime(cmd *cobra.Command, args []string) {
 	requestPacket := ring.MakeTimeSetRequest(time.Now())
 	ble.RequestDataViaCommandUART(device, requestPacket, setTimeResponseReceived, 1)
 
-	log.Backspaces(bspCount)
+	log.ClearPrompt()
 	log.Report("Ring's time set")
 }
 
 func setTimeResponseReceived(receivedData []byte) {
 
 	if receivedData[0] == ring.COMMAND_SET_TIME {
-		utils.StopAnimation()
 		ble.UARTInfoReceived = true
 	}
 }

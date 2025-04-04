@@ -1,4 +1,4 @@
-package ringCLI_BLE
+package ringcliBLE
 
 import (
 	ring "ringcli/lib/colmi"

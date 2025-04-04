@@ -6,7 +6,6 @@ import (
 	ble "ringcli/lib/ble"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
-	utils "ringcli/lib/utils"
 	"strings"
 	"time"
 	"tinygo.org/x/bluetooth"
@@ -34,8 +33,7 @@ var ScanCmd = &cobra.Command{
 
 func doScan(cmd *cobra.Command, args []string) {
 
-	bspCount = log.Raw("Scanning...  ")
-	utils.AnimateCursor()
+	log.Prompt("Scanning")
 
 	// Enable BLE
 	radio := ble.Open()
@@ -45,7 +43,8 @@ func doScan(cmd *cobra.Command, args []string) {
 	defer scanTimer.Stop()
 	go func() {
 		<-scanTimer.C
-		utils.StopAnimation()
+		// Timeout
+		log.ClearPrompt()
 		exitCode := errors.ERROR_CODE_SCAN_TIMEOUT
 		if len(rings) > 0 {
 			// We have one or more rings, so display their data before exiting
@@ -83,7 +82,7 @@ func onScan(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 
 		if scanForFirstRing {
 			scanTimer.Stop()
-			utils.StopAnimation()
+			log.ClearPrompt()
 			printFoundRings()
 			os.Exit(errors.ERROR_CODE_NONE)
 		}
@@ -100,8 +99,6 @@ func onScan(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 }
 
 func printFoundRings() {
-
-	log.Backspaces(bspCount)
 
 	if len(rings) > 0 {
 		for address, name := range rings {

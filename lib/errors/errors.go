@@ -1,4 +1,18 @@
-package ringCLI_Errors
+package ringcliErrors
+
+import (
+	"fmt"
+)
+
+type RingcliError struct {
+	Message string
+	Code    int
+}
+
+func (e *RingcliError) Error() string {
+
+	return fmt.Sprintf("%s (%d)", e.Message, e.Code)
+}
 
 const (
 	ERROR_CODE_NONE                     int = 0

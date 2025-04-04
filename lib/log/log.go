@@ -1,9 +1,10 @@
-package ringCLI_Log
+package ringcliLog
 
 import (
 	"fmt"
 	"os"
 	"strings"
+	spinner "ringcli/lib/spinner"
 )
 
 const (
@@ -13,9 +14,28 @@ const (
 	DEBUG_MESSAGE   int = 3
 	DATA_OUTPUT     int = 4
 
-	ESC = "\x1B"
-	CSI = ESC + "["
+	ESC    string = "\x1B"
+	CSI    string = ESC + "["
+	CURSOR string = "|/-\\"
 )
+
+var (
+	bspCount int = 0
+	cursorSpinner *spinner.Spinner
+)
+
+func Prompt(text string) {
+
+	bspCount = Raw(text + "...  ")
+	cursorSpinner = spinner.NewSpinner(CURSOR)
+	cursorSpinner.Start()
+}
+
+func ClearPrompt() {
+
+	cursorSpinner.Stop()
+	Backspaces(bspCount)
+}
 
 func Raw(msg string, values ...any) int {
 
@@ -26,14 +46,18 @@ func Raw(msg string, values ...any) int {
 
 func Backspaces(count int) {
 
-	Raw(CSI + fmt.Sprintf("%dD", count))
-	Raw(strings.Repeat(" ", count))
-	Raw(CSI + fmt.Sprintf("%dD", count))
+	if count > 0 {
+		Raw(CSI + fmt.Sprintf("%dD", count))
+		Raw(strings.Repeat(" ", count))
+		Raw(CSI + fmt.Sprintf("%dD", count))
+	}
 }
 
 func Backspace(count int) {
 
-	Raw(CSI + fmt.Sprintf("%dD", count))
+	if count > 0 {
+		Raw(CSI + fmt.Sprintf("%dD", count))
+	}
 }
 
 func Report(msg string, values ...any) {

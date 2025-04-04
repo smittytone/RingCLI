@@ -1,4 +1,4 @@
-package ringCLI_Colmi
+package ringcliColmi
 
 const (
 	COMMAND_SET_TIME             byte = 0x01

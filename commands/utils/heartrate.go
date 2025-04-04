@@ -6,7 +6,6 @@ import (
 	ring "ringcli/lib/colmi"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
-	utils "ringcli/lib/utils"
 )
 
 // Globals relevant only to this command
@@ -60,8 +59,7 @@ func setHeartRatePeriod(cmd *cobra.Command, args []string) {
 		heartRatePeriod = 60
 	}
 
-	bspCount = log.Raw("Setting heart rate monitoring state...  ")
-	utils.AnimateCursor()
+	log.Prompt("Setting heart rate monitoring state")
 
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
@@ -74,8 +72,7 @@ func getHeartRatePeriod(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	bspCount = log.Raw("Getting heart rate monitoring state...  ")
-	utils.AnimateCursor()
+	log.Prompt("Getting heart rate monitoring state")
 
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
@@ -86,8 +83,6 @@ func getHeartRatePeriod(cmd *cobra.Command, args []string) {
 func receiveHeartRatePeriod(receivedData []byte) {
 
 	if receivedData[0] == ring.COMMAND_HEART_RATE_PERIOD {
-		utils.StopAnimation()
-
 		// Parse and report received data
 		enabled, period := ring.ParseHeartRatePeriodResponse(receivedData)
 		enabledString := "enabled"
@@ -95,7 +90,7 @@ func receiveHeartRatePeriod(receivedData []byte) {
 			enabledString = "disabled"
 		}
 
-		log.Backspace(bspCount)
+		log.ClearPrompt()
 		log.Report("Periodic heart rate monitoring is %s", enabledString)
 
 		// Only output period if periodic readings are enabled and we're making a GET request

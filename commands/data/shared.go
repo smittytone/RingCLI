@@ -15,7 +15,6 @@ const (
 var (
 	debug       bool   = false // Are we in debug mode?
 	ringAddress string = ""    // Ring BLE address
-	bspCount    int    = 0     // Number of characters to backspace over in terminal
 )
 
 // Set up the `data` sub-commands' flags.

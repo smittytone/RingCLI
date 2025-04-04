@@ -1,4 +1,4 @@
-package ringCLI_Colmi
+package ringcliColmi
 
 type DateStamp struct {
 	Year      int

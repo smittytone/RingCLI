@@ -1,13 +1,11 @@
-package ringCLI_Colmi
+package ringcliColmi
 
 import (
 	"encoding/binary"
 	"fmt"
-	"time"
-	// App
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
-	utils "ringcli/lib/utils"
+	"time"
 )
 
 type HeartRateDatapoint struct {
@@ -108,7 +106,6 @@ func ParseHeartRateDataResponse(packet []byte, minutesInterval int) *HeartRateDa
 
 	if packet[0] == COMMAND_HEART_RATE_READ {
 		if packet[1] == COMMAND_ERROR {
-			utils.StopAnimation()
 			log.ReportErrorAndExit(errors.ERROR_CODE_BAD_HEART_DATA_REQUEST, "Input heart rate data packet malformed or no data available")
 			return nil
 		}

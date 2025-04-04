@@ -28,8 +28,7 @@ func getSteps(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	bspCount = log.Raw("Retrieving activity data...  ")
-	utils.AnimateCursor()
+	log.Prompt("Retrieving activity data")
 
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
@@ -91,8 +90,7 @@ func receiveSportsInfo(receivedData []byte) {
 
 func outputStepsInfo() {
 
-	utils.StopAnimation()
-	log.Backspaces(bspCount)
+	log.ClearPrompt()
 
 	// Output...
 	log.Report("Activity Info for %d %s %d:", activityTotals.Timestamp.Day, utils.StringifyMonth(activityTotals.Timestamp.Month), activityTotals.Timestamp.Year)

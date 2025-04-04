@@ -6,7 +6,6 @@ import (
 	ble "ringcli/lib/ble"
 	ring "ringcli/lib/colmi"
 	log "ringcli/lib/log"
-	utils "ringcli/lib/utils"
 	"tinygo.org/x/bluetooth"
 )
 
@@ -39,8 +38,7 @@ func getInfo(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	bspCount = log.Raw("Retrieving ring information...  ")
-	utils.AnimateCursor()
+	log.Prompt("Retrieving ring information")
 
 	// Enable BLE
 	deviceInfo.battery.Level = 0
@@ -114,11 +112,7 @@ func processDeviceInfo(service bluetooth.DeviceService) {
 
 func outputRingInfo(showBatteryOnly bool) {
 
-	utils.StopAnimation()
-
-	if bspCount > 0 {
-		log.Backspaces(bspCount)
-	}
+	log.ClearPrompt()
 
 	chargeState := "not charging"
 	if deviceInfo.battery.IsCharging {
