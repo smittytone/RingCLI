@@ -53,7 +53,7 @@ func getInfo(cmd *cobra.Command, args []string) {
 	requestBatteryInfo(device)
 
 	// Output received ring data
-	outputRingInfo(false)
+	outputRingInfo()
 }
 
 func requestBatteryInfo(device bluetooth.Device) {
@@ -110,26 +110,28 @@ func processDeviceInfo(service bluetooth.DeviceService) {
 	}
 }
 
-func outputRingInfo(showBatteryOnly bool) {
+func outputRingInfo() {
+
+	chargeState := getChargeState(deviceInfo.battery.IsCharging)
 
 	log.ClearPrompt()
-
-	chargeState := "not charging"
-	if deviceInfo.battery.IsCharging {
-		chargeState = "charging"
-	}
-
-	if showBatteryOnly {
-		log.Report("Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
-		return
-	}
-
 	log.Report("Ring Info:                     ")
+	log.Report("   Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
 	log.Report("Firmware Version: %s", deviceInfo.firmware)
 	log.Report("Hardware Version: %s", deviceInfo.hardware)
 	log.Report("    Manufacturer: %s", deviceInfo.maker)
 	log.Report("       System ID: %s", deviceInfo.system)
 	log.Report("          PnP ID: %s", deviceInfo.pnp)
+}
+
+func getChargeState(isCharging bool) string {
+
+	chargeState := "not charging"
+	if isCharging {
+		chargeState = "charging"
+	}
+
+	return chargeState
 }
 
 func decodePnP(data []byte) string {

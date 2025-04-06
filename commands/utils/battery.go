@@ -28,5 +28,12 @@ func getBatteryState(cmd *cobra.Command, args []string) {
 	requestBatteryInfo(device)
 
 	// Output received ring data
-	outputRingInfo(true)
+	outputBatteryInfo()
+}
+
+func outputBatteryInfo() {
+
+	chargeState := getChargeState(deviceInfo.battery.IsCharging)
+	log.ClearPrompt()
+	log.Report("Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
 }
