@@ -10,7 +10,7 @@ import (
 
 // Define the `settime` subcommand.
 var SetTimeCmd = &cobra.Command{
-	Use:   "settime",
+	Use:   "time",
 	Short: "Initialise the ring's date and time",
 	Long:  "Initialise the ring's date and time.",
 	Run:   setTime,

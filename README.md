@@ -34,7 +34,7 @@ If your ring is in range and powered on (ie. it has been placed the the charger 
 If you haven’t used another app to set the date and time on your ring, run:
 
 ```shell
-ringlci utils settime --address {your ring BLE address}
+ringlci utils time --address {your ring BLE address}
 ```
 
 You will need to do this to initialise your ring for use if you have not done so already.
@@ -60,19 +60,19 @@ ringlci utils battery --address {your ring BLE address}
 To enable periodic heart rate readings, issue:
 
 ```shell
-ringlci utils setheartrate --address {your ring BLE address} --period 60 --enable
+ringlci utils heartrate --address {your ring BLE address} --period 60 --enable
 ```
 
 The period is in minutes and must be in the range of 1 to 255. Setting the period to zero disables periodic readings, as does using the `--disable` switch (unless `--enable` has been included too).
 
 ```shell
-ringlci utils setheartrate --address {your ring BLE address} --disable
+ringlci utils heartrate --address {your ring BLE address} --disable
 ```
 
 This call gets the current state:
 
 ```shell
-ringlci utils getheartrate --address {your ring BLE address}
+ringlci utils heartrate --address {your ring BLE address} --show
 ```
 
 #### Locate a Ring

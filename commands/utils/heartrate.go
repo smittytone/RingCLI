@@ -10,25 +10,18 @@ import (
 
 // Globals relevant only to this command
 var (
-	heartRateEnableSet  bool = false // User has asked to enable heart rate monitoring
-	heartRateDisableSet bool = false // User has asked to disable heart rate monitoring
-	heartRatePeriod     int  = 60    // Heart rate monitoring period
+	heartRateEnableSet   bool = false // User has asked to enable heart rate monitoring
+	heartRateDisableSet  bool = false // User has asked to disable heart rate monitoring
+	heartRatePeriod      int  = 0     // Heart rate monitoring period
+	getHeartRateSettings bool = false // Is this a get operation?
 )
 
-// Define the `setheartrate` sub-command.
-var SetHeartRateCmd = &cobra.Command{
-	Use:   "setheartrate",
-	Short: "Set the heart rate monitoring period",
-	Long:  "Set the heart rate monitoring period in minutes, and enable or disable monitoring.",
-	Run:   setHeartRatePeriod,
-}
-
-// Define the `getheartrate` sub-command.
-var GetHeartRateCmd = &cobra.Command{
-	Use:   "getheartrate",
+// Define the `heartrate` sub-command.
+var HeartRateCmd = &cobra.Command{
+	Use:   "heartrate",
 	Short: "Get the heart rate monitoring period",
 	Long:  "Get the heart rate monitoring state and, if enabled, its periodicity in minutes.",
-	Run:   getHeartRatePeriod,
+	Run:   setHeartRatePeriod,
 }
 
 func setHeartRatePeriod(cmd *cobra.Command, args []string) {
@@ -36,7 +29,13 @@ func setHeartRatePeriod(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	// Check params: period in minutes
+	// Check for the `--show` flag
+	if getHeartRateSettings {
+		getHeartRatePeriod(cmd, args)
+		return
+	}
+
+	// Check params: the measurement period (it's in minutes)
 	if heartRatePeriod < 0 || heartRatePeriod > 255 {
 		log.ReportErrorAndExit(errors.ERROR_CODE_BAD_PARAMS, "Heart rate reading period out of range (0-255 minutes)")
 	}

@@ -33,16 +33,13 @@ func init() {
 	FindCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
 	FindCmd.Flags().BoolVarP(&continuousFlash, "continuous", "c", false, "Flash the ring's LED continuously until cancelled")
 
-	// SET HEART RATE
-	// Add optional flags: --enable, --disable, --period, --address
-	SetHeartRateCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
-	SetHeartRateCmd.Flags().BoolVarP(&heartRateEnableSet, "enable", "", false, "Enable periodic heart rate readings")
-	SetHeartRateCmd.Flags().BoolVarP(&heartRateDisableSet, "disable", "", false, "Disable periodic heart rate readings")
-	SetHeartRateCmd.Flags().IntVarP(&heartRatePeriod, "period", "p", 60, "Heart rate period readings in seconds (0-255)")
-
 	// GET HEART RATE
-	// Add optional flags: --address
-	GetHeartRateCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
+	// Add optional flags: --address, --show, --period, --enable, --disable
+	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
+	HeartRateCmd.Flags().BoolVarP(&getHeartRateSettings, "show", "s", false, "Display current periodic heart rate settings")
+	HeartRateCmd.Flags().IntVarP(&heartRatePeriod, "period", "p", 60, "Heart rate period readings in seconds (0-255)")
+	HeartRateCmd.Flags().BoolVarP(&heartRateEnableSet, "enable", "", false, "Enable periodic heart rate readings")
+	HeartRateCmd.Flags().BoolVarP(&heartRateDisableSet, "disable", "", false, "Disable periodic heart rate readings")
 
 	// INFO
 	// Add optional flags: --address
