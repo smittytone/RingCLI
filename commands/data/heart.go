@@ -1,7 +1,6 @@
 package rcDataCommands
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
 	ring "ringcli/lib/colmi"
@@ -87,15 +86,19 @@ func outputHeartData() {
 		if hrdp.Time.Before(time.Now()) || hrdp.Time.Equal(time.Now()) {
 			if hrdp.Rate == 0 {
 				if noDataMessageStart == "" {
-					noDataMessageStart = fmt.Sprintf("  Ring not worn or no data available from %s to", hrdp.Timestamp)
-				} else {
-					noDataMessageEnd = hrdp.Timestamp
+					noDataMessageStart = hrdp.Timestamp
 				}
+
+				noDataMessageEnd = hrdp.Timestamp
 			} else {
 				if noDataMessageStart != "" {
-					log.Report("%s %s (UTC)", noDataMessageStart, noDataMessageEnd)
+					if noDataMessageStart != noDataMessageEnd {
+						log.Report("  Ring not worn or (no data available) from %s to %s (UTC)", noDataMessageStart, noDataMessageEnd)
+					} else {
+						log.Report("  Ring not worn or (no data available) at %s (UTC)", noDataMessageStart)
+					}
 					noDataMessageStart = ""
-					noDataMessageEnd = "now"
+					noDataMessageEnd = ""
 				}
 
 				log.Report("  %d bpm at %s (UTC)", hrdp.Rate, hrdp.Timestamp)
