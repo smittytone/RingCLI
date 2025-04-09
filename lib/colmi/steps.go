@@ -80,9 +80,9 @@ func ParseStepsResponse(packet []byte) SportsInfo {
 
 	info := SportsInfo{
 		Timestamp: packetTime,
-		Steps:     int(packet[10])<<8 + int(packet[9]),
-		Distance:  int(packet[12])<<8 + int(packet[11]),
-		Calories:  int(packet[8])<<8 + int(packet[7]),
+		Steps:     int(packet[10]) << 8 + int(packet[9]),
+		Distance:  int(packet[12]) << 8 + int(packet[11]),
+		Calories:  int(packet[8]) << 8 + int(packet[7]),
 		NoData:    false,
 		IsDone:    false,
 	}
@@ -95,10 +95,9 @@ func ParseStepsResponse(packet []byte) SportsInfo {
 	// Packet management
 	currentPacket := int(packet[5])
 	maxPacket := int(packet[6]) - 1
-	if currentPacket == maxPacket {
-		// End of block
-		info.IsDone = true
-	}
+
+	// Check for end of block
+	info.IsDone = (currentPacket == maxPacket)
 
 	// Return the data for accrual
 	return info
