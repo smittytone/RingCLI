@@ -1,5 +1,9 @@
 package ringcliColmi
 
+import (
+	"time"
+)
+
 type DateStamp struct {
 	Year      int
 	Month     int
@@ -106,4 +110,19 @@ func ParseStepsResponse(packet []byte) SportsInfo {
 func bcdToDecimal(bcd int) int {
 
 	return (((bcd >> 4) & 15) * 10) + (bcd & 15)
+}
+
+func TimestampFromNow() DateStamp {
+
+	now := time.Now()
+	stamp := DateStamp{
+		Year: now.Year(),
+		Month: int(now.Month()),
+		Day: now.Day(),
+		Hour: now.Hour(),
+		Minutes: now.Minute(),
+		TimePhase: 0,
+	}
+
+	return stamp
 }

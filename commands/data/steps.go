@@ -49,7 +49,17 @@ func requestSportsInfo(device bluetooth.Device) {
 		log.ReportErrorAndExit(errors.ERROR_CODE_BAD_ACTIVITY_TIME_OFFSET, "Date offset out of range")
 	}
 
-	activityTotals = ring.SportsInfo{}
+	ts := ring.TimestampFromNow()
+	activityTotals = ring.SportsInfo{
+		Steps: 0,
+		Distance: 0,
+		Calories: 0,
+		NoData: true,
+		IsDone: false,
+		NewCalories: false,
+		Timestamp: ts,
+	}
+
 	ble.RequestDataViaCommandUART(device, requestPacket, receiveSportsInfo, 1)
 }
 
@@ -80,7 +90,6 @@ func receiveSportsInfo(receivedData []byte) {
 		activityTotals.Steps += info.Steps
 		activityTotals.Distance += info.Distance
 
-		//now := time.Now().Hour() * 4
 		if info.IsDone {
 			// Completion notice -- but we'll probably have timed out before this
 			ble.UARTInfoReceived = true
