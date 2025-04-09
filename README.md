@@ -7,7 +7,6 @@ CLI access to data stored on the Colmi R02 smart ring.
 ## Compilation
 
 1. [Install Go](https://go.dev/dl/)
-1. [Install TinyGo](https://tinygo.org/getting-started/install/)
 1. Clone this repo
 1. `cd RingCLI`
 1. `go mod tidy`
