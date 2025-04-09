@@ -29,6 +29,10 @@ var rootCmd = &cobra.Command{
 	Short: "A Colmi R02 CLI tool",
 	Long:  "A Colmi R02 CLI tool.",
 	Run:   showRootHelp,
+	ValidArgs: []string{
+		"data",
+		"utils",
+	},
 }
 
 func Execute() {
@@ -55,8 +59,7 @@ func init() {
 
 func showHelp() {
 
-	help := `ringcli
-Manage your Colmi R02 smart ring and retrieve data from it.
+	help := `Manage your Colmi R02 smart ring and retrieve data from it.
 
 Usage:
   ringcli {COMMAND} [SUBCOMMAND] {REQUIRED VALUES} [FLAGS]

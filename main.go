@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 	commands "ringcli/commands"
-	rcBLE "ringcli/lib/ble"
+	ble "ringcli/lib/ble"
 	"syscall"
 )
 
@@ -20,7 +20,7 @@ func main() {
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-signalChannel
-		rcBLE.Clean()
+		ble.Clean()
 		os.Exit(0)
 	}()
 

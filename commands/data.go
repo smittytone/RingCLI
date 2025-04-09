@@ -12,6 +12,10 @@ var rcDataCommand = &cobra.Command{
 	Short: "Access ring data",
 	Long:  "Read and store data retrieved from the ring.",
 	Run:   showAppHelp,
+	ValidArgs: []string{
+		"heart",
+		"steps",
+	},
 }
 
 func init() {

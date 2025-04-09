@@ -12,6 +12,16 @@ var rcUtilsCommand = &cobra.Command{
 	Short: "Ring utility commands",
 	Long:  "Scan for Colmi R02 rings and perform housekeeping on one of them.",
 	Run:   showAppHelp,
+	ValidArgs: []string{
+		"battery",
+		"bind",
+		"find",
+		"heartrate",
+		"info",
+		"scan",
+		"shutdown",
+		"time",
+	},
 }
 
 func init() {

@@ -13,8 +13,8 @@ const (
 
 // Globals for all commands
 var (
-	debug       bool   = false // Are we in debug mode?
-	ringAddress string = ""    // Ring BLE address
+	debug            bool     = false // Are we in debug mode?
+	ringAddress      string   = ""    // Ring BLE address
 )
 
 // Set up the `data` sub-commands' flags.

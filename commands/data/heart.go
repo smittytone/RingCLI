@@ -18,10 +18,10 @@ var (
 
 // Define the `heartrate` sub-command.
 var HeartRateCmd = &cobra.Command{
-	Use:   "heartrate",
-	Short: "Get your current heart rate",
-	Long:  "Get your current heart rate",
-	Run:   getHeartRate,
+	Use:       "heartrate",
+	Short:     "Get your current heart rate",
+	Long:      "Get your current heart rate",
+	Run:       getHeartRate,
 }
 
 func getHeartRate(cmd *cobra.Command, args []string) {
