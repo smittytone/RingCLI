@@ -39,6 +39,8 @@ ringlci utils time --address {your ring BLE address}
 
 You will need to do this to initialise your ring for use if you have not done so already.
 
+**Note** If you perform this operation later, it will reset your ring and any data it has recorded about your activity.
+
 #### Get Ring Info
 
 With your ring’s address you can now obtain more information about it, including its battery state:
