@@ -24,6 +24,9 @@ func init() {
 
 	// Add optional flags: --address
 	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
+
+	// Add optional flags: --address
+	BloodOxygenCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
 }
 
 // Apply the logging Level string, eg. "debug" from the `--log` flag.

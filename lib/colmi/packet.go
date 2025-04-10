@@ -39,3 +39,15 @@ func VerifyChecksum(packet []byte) bool {
 	chk := checksum(packet[0:15])
 	return chk == packet[15]
 }
+
+func MakeDataPacket(command byte) []byte {
+
+	packet := make([]byte, 6, 6)
+	packet[0] = DATA_REQUEST_MAGIC_VALUE
+	packet[1] = command
+	packet[2] = 0x00
+	packet[3] = 0x00
+	packet[4] = 0xFF
+	packet[5] = 0xFF
+	return packet
+}

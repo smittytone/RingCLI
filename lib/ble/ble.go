@@ -103,10 +103,10 @@ func Characteristics(service bluetooth.DeviceService, uuids []bluetooth.UUID) []
 	return characteristics
 }
 
-func RequestDataViaCommandUART(ble bluetooth.Device, requestPacket []byte, callback func([]byte), maxWrites uint) {
+func RequestDataViaCommandUART(device bluetooth.Device, requestPacket []byte, callback func([]byte), maxWrites uint) {
 
 	// Get the characteristics within the UART service
-	characteristics := ReadyCommandUART(ble)
+	characteristics := ReadyCommandUART(device)
 	noResponseExpected := false
 	var writeCount uint = 0
 
@@ -152,11 +152,11 @@ func RequestDataViaCommandUART(ble bluetooth.Device, requestPacket []byte, callb
 	}
 }
 
-func ReadyCommandUART(ble bluetooth.Device) []bluetooth.DeviceCharacteristic {
+func ReadyCommandUART(device bluetooth.Device) []bluetooth.DeviceCharacteristic {
 
 	// Get the UART service
 	uuid := UUIDFromString(ring.UUID_BLE_COMMAND_UART_SERVICE)
-	service := Services(ble, []bluetooth.UUID{uuid})
+	service := Services(device, []bluetooth.UUID{uuid})
 
 	// Get the characteristics within the UART service
 	tx := UUIDFromString(ring.UUID_BLE_COMMAND_UART_TX_CHAR)
@@ -164,11 +164,35 @@ func ReadyCommandUART(ble bluetooth.Device) []bluetooth.DeviceCharacteristic {
 	return Characteristics(service[0], []bluetooth.UUID{tx, rx})
 }
 
-func ReadyDataUART(ble bluetooth.Device) []bluetooth.DeviceCharacteristic {
+func RequestDataViaDataUART(device bluetooth.Device, requestPacket []byte, callback func([]byte)) {
+
+	// Get the characteristics within the UART service
+	characteristics := ReadyDataUART(device)
+
+	// Enable notifications via RX
+	err := characteristics[1].EnableNotifications(callback)
+	if err != nil {
+		connectTimer.Stop()
+		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not enable UART notifications: %s", err.Error())
+	}
+
+	// Request data via the TX
+	_, err = characteristics[0].WriteWithoutResponse(requestPacket)
+	if err != nil {
+		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not write UART packet: %s", err.Error())
+	}
+
+	// Wait (block) for the command response packet(s)
+	for !UARTInfoReceived {
+		// NOP
+	}
+}
+
+func ReadyDataUART(device bluetooth.Device) []bluetooth.DeviceCharacteristic {
 
 	// Get the UART service
 	uuid := UUIDFromString(ring.UUID_BLE_DATA_UART_SERVICE)
-	service := Services(ble, []bluetooth.UUID{uuid})
+	service := Services(device, []bluetooth.UUID{uuid})
 
 	// Get the characteristics within the UART service
 	tx := UUIDFromString(ring.UUID_BLE_DATA_UART_TX_CHAR)

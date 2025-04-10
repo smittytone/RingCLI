@@ -22,6 +22,7 @@ func init() {
 
 	rcDataCommand.AddCommand(rcDataCommands.StepsCmd)
 	rcDataCommand.AddCommand(rcDataCommands.HeartRateCmd)
+	rcDataCommand.AddCommand(rcDataCommands.BloodOxygenCmd)
 	rootCmd.AddCommand(rcDataCommand)
 }
 

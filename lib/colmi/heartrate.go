@@ -171,9 +171,8 @@ func packageHeartRateData(startTime time.Time, minuteDelta int) []HeartRateDatap
 
 		results = append(results, hrdp)
 
-		min += minuteDelta
-		for min >= 60 {
-			min = 60 - min
+		min = (min + minuteDelta) % 60
+		if min == 0 {
 			hour += 1
 		}
 

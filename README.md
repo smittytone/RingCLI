@@ -1,8 +1,12 @@
-# RingCLI 0.1.0
+# RingCLI 0.1.1
 
 CLI access to data stored on the Colmi R02 smart ring.
 
 ![Colmi R02 smart ring](./images/r02_001.webp)
+
+## Release Notes
+
+* 0.1.1 adds [SpO2 retrieval](#blood-oxygen).
 
 ## Compilation
 
@@ -136,6 +140,14 @@ The `data` sub-command `heartrate` will retrieve the day’s heart rate readings
 
 ```shell
 ringlci data heartrate --address {your ring BLE address}
+```
+
+#### Blood Oxygen
+
+The `data` sub-command `spo2` will retrieve the past two days’ blood oxygen (SpO2) readings:
+
+```shell
+ringlci data spo2 --address {your ring BLE address}
 ```
 
 ## Copyright and Licence
