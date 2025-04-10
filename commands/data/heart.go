@@ -93,9 +93,9 @@ func outputHeartData() {
 			} else {
 				if noDataMessageStart != "" {
 					if noDataMessageStart != noDataMessageEnd {
-						log.Report("  Ring not worn or (no data available) from %s to %s (UTC)", noDataMessageStart, noDataMessageEnd)
+						log.Report("  Ring not worn (or no data available) from %s to %s (UTC)", noDataMessageStart, noDataMessageEnd)
 					} else {
-						log.Report("  Ring not worn or (no data available) at %s (UTC)", noDataMessageStart)
+						log.Report("  Ring not worn (or no data available) at %s (UTC)", noDataMessageStart)
 					}
 					noDataMessageStart = ""
 					noDataMessageEnd = ""
