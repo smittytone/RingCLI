@@ -25,8 +25,9 @@ func init() {
 	// Add optional flags: --address
 	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
 
-	// Add optional flags: --address
+	// Add optional flags: --address, --full
 	BloodOxygenCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
+	BloodOxygenCmd.Flags().BoolVarP(&showFull, "full", "f", false, "Show all available data, not just the most recent 24-hour period.")
 }
 
 // Apply the logging Level string, eg. "debug" from the `--log` flag.
