@@ -26,7 +26,7 @@ var FindCmd = &cobra.Command{
 func findRing(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	// Set a long flash count for 'continuous', ie. not literally so
 	if continuousFlash {
@@ -37,7 +37,7 @@ func findRing(cmd *cobra.Command, args []string) {
 	}
 
 	// Enable BLE
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 	requestPacket := ring.MakeLedFlashRequest()
 	ble.RequestDataViaCommandUART(device, requestPacket, flashPacketResponseReceived, flashCount)

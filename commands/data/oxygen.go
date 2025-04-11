@@ -8,6 +8,7 @@ import (
 	log "ringcli/lib/log"
 	"strings"
 	"time"
+	"tinygo.org/x/bluetooth"
 )
 
 var (
@@ -26,19 +27,24 @@ var BloodOxygenCmd = &cobra.Command{
 func getBloodOxygen(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	log.Prompt("Retrieving blood oxygen data")
 
 	// Enable BLE
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 
 	// Get the data
-	ble.RequestDataViaDataUART(device, ring.MakeBloodOxygenGetRequest(), receiveBloodOxygenData)
+	RequestBloodOxygenData(device)
 
 	// Output received ring data
-	outputBloodOxygenData()
+	OutputBloodOxygenData()
+}
+
+func RequestBloodOxygenData(device bluetooth.Device) {
+
+	ble.RequestDataViaDataUART(device, ring.MakeBloodOxygenGetRequest(), receiveBloodOxygenData)
 }
 
 func receiveBloodOxygenData(receivedData []byte) {
@@ -54,9 +60,14 @@ func receiveBloodOxygenData(receivedData []byte) {
 	}
 }
 
-func outputBloodOxygenData() {
+func OutputBloodOxygenData() {
 
 	log.ClearPrompt()
+
+	if bloodOxygenData == nil {
+		log.Report("No blood oxygen data available")
+		return
+	}
 
 	if showFull {
 		log.Report("Full blood oxygen data from %s", bloodOxygenData.Time.String())

@@ -26,22 +26,22 @@ var StepsCmd = &cobra.Command{
 func getSteps(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	log.Prompt("Retrieving activity data")
 
 	// Enable BLE
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 
 	// Get the activity data
-	requestSportsInfo(device)
+	RequestSportsInfo(device)
 
 	// Output received ring data
-	outputStepsInfo()
+	OutputStepsInfo()
 }
 
-func requestSportsInfo(device bluetooth.Device) {
+func RequestSportsInfo(device bluetooth.Device) {
 
 	// TODO Allow date offset to be added via cli option
 	requestPacket := ring.MakeStepsRequest(0)
@@ -97,7 +97,7 @@ func receiveSportsInfo(receivedData []byte) {
 	}
 }
 
-func outputStepsInfo() {
+func OutputStepsInfo() {
 
 	log.ClearPrompt()
 

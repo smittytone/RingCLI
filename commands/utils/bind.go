@@ -25,21 +25,21 @@ func bindRing(cmd *cobra.Command, args []string) {
 
 	if doShow {
 		// Just show binding info
-		ringAddress = utils.GetStoredRingAddress()
-		if ringAddress != "" {
-			log.Report("Ring %s is currently bound", ringAddress)
+		RingAddress = utils.GetStoredRingAddress()
+		if RingAddress != "" {
+			log.Report("Ring %s is currently bound", RingAddress)
 		} else {
 			log.Report("No ring bound")
 		}
 	} else {
 		// Set binding
-		if ringAddress == "" {
+		if RingAddress == "" {
 			// Bail when no ring address has been provided
 			log.ReportErrorAndExit(errors.ERROR_CODE_BAD_PARAMS, "No address supplied")
 		}
 
 		// Write out the binding for future use
-		utils.MakeBinding(ringAddress, doOverwrite)
-		log.Report("Ring %s bound", ringAddress)
+		utils.MakeBinding(RingAddress, doOverwrite)
+		log.Report("Ring %s bound", RingAddress)
 	}
 }

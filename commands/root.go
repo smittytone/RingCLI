@@ -32,6 +32,7 @@ var rootCmd = &cobra.Command{
 	ValidArgs: []string{
 		"data",
 		"utils",
+		"summary",
 	},
 }
 

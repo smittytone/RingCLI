@@ -19,12 +19,12 @@ var SetTimeCmd = &cobra.Command{
 func setTime(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	log.Prompt("Setting your ring's date and time")
 
 	// Enable BLE
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 	requestPacket := ring.MakeTimeSetRequest(time.Now())
 	ble.RequestDataViaCommandUART(device, requestPacket, setTimeResponseReceived, 1)

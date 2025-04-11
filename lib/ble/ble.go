@@ -37,21 +37,21 @@ func Open() *bluetooth.Adapter {
 	return ble
 }
 
-func Connect(adapter *bluetooth.Adapter, ringAddress bluetooth.Address) bluetooth.Device {
+func Connect(adapter *bluetooth.Adapter, RingAddress bluetooth.Address) bluetooth.Device {
 
 	// Establish a timer so we're not trying to connect forever
 	connectTimer = time.NewTimer(CONNECT_TIMEOUT_S * time.Second)
 	defer connectTimer.Stop()
 	go func() {
 		<-connectTimer.C
-		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not connect to %s, or connection timed out", ringAddress.String())
+		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not connect to %s, or connection timed out", RingAddress.String())
 	}()
 
 	// Attempt to connect
-	device, err := adapter.Connect(ringAddress, bluetooth.ConnectionParams{})
+	device, err := adapter.Connect(RingAddress, bluetooth.ConnectionParams{})
 	if err != nil {
 		connectTimer.Stop()
-		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not connect to %s", ringAddress)
+		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not connect to %s", RingAddress)
 	}
 
 	isConnected = true
@@ -76,9 +76,9 @@ func Clean() {
 	}
 }
 
-func EnableAndConnect(ringAddress string) bluetooth.Device {
+func EnableAndConnect(RingAddress string) bluetooth.Device {
 
-	return Connect(Open(), AddressFromString(ringAddress))
+	return Connect(Open(), AddressFromString(RingAddress))
 }
 
 func Services(ble bluetooth.Device, uuids []bluetooth.UUID) []bluetooth.DeviceService {
@@ -214,10 +214,10 @@ func BeginScan(adapter *bluetooth.Adapter, callback func(*bluetooth.Adapter, blu
 	}
 }
 
-func AddressFromString(ringAddress string) bluetooth.Address {
+func AddressFromString(RingAddress string) bluetooth.Address {
 
 	var bleAddress bluetooth.Address
-	bleAddress.Set(ringAddress)
+	bleAddress.Set(RingAddress)
 	return bleAddress
 }
 

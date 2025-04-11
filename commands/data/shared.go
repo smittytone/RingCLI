@@ -14,19 +14,19 @@ const (
 // Globals for all commands
 var (
 	debug            bool     = false // Are we in debug mode?
-	ringAddress      string   = ""    // Ring BLE address
+	RingAddress      string   = ""    // Ring BLE address
 )
 
 // Set up the `data` sub-commands' flags.
 func init() {
 	// Add optional flags: --address
-	StepsCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
+	StepsCmd.Flags().StringVarP(&RingAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
 
 	// Add optional flags: --address
-	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
+	HeartRateCmd.Flags().StringVarP(&RingAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
 
 	// Add optional flags: --address, --full
-	BloodOxygenCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
+	BloodOxygenCmd.Flags().StringVarP(&RingAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
 	BloodOxygenCmd.Flags().BoolVarP(&showFull, "full", "f", false, "Show all available data, not just the most recent 24-hour period.")
 }
 
@@ -43,14 +43,14 @@ func processFlags(cmd *cobra.Command, args []string) {
 	*/
 }
 
-func getRingAddress() {
+func GetRingAddress() {
 
-	// Check that `ringAddress` has been set by option: if it has, `ringAddress` will not be empty
-	if ringAddress == "" {
+	// Check that `RingAddress` has been set by option: if it has, `RingAddress` will not be empty
+	if RingAddress == "" {
 		// Try to get a stored (bound)
-		ringAddress = utils.GetStoredRingAddress()
+		RingAddress = utils.GetStoredRingAddress()
 
-		if ringAddress == "" {
+		if RingAddress == "" {
 			// No loaded address so report and bail
 			log.ReportErrorAndExit(errors.ERROR_CODE_BAD_PARAMS, "No name or address supplied")
 		}

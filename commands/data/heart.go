@@ -27,22 +27,22 @@ var HeartRateCmd = &cobra.Command{
 func getHeartRate(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	log.Prompt("Retrieving heart rate data")
 
 	// Enable BLE
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 
 	// Get the data interval -- we'll use this to parse the received data
 	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartDataSettings, 1)
 
 	// Get the activity data
-	requestHeartData(device)
+	RequestHeartData(device)
 
 	// Output received ring data
-	outputHeartData()
+	OutputHeartData()
 }
 
 func receiveHeartDataSettings(receivedData []byte) {
@@ -58,7 +58,7 @@ func receiveHeartDataSettings(receivedData []byte) {
 	}
 }
 
-func requestHeartData(device bluetooth.Device) {
+func RequestHeartData(device bluetooth.Device) {
 
 	// TODO Allow date offset to be added via CLI option
 	requestPacket := ring.MakeHeartRateReadRequest(utils.StartToday(time.Now().UTC()))
@@ -77,7 +77,7 @@ func receiveHeartData(receivedData []byte) {
 	}
 }
 
-func outputHeartData() {
+func OutputHeartData() {
 
 	noDataMessageStart, noDataMessageEnd := "", ""
 	log.ClearPrompt()

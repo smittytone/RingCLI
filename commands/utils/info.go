@@ -36,13 +36,13 @@ var InfoCmd = &cobra.Command{
 func getInfo(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	log.Prompt("Retrieving ring information")
 
 	// Enable BLE
 	deviceInfo.battery.Level = 0
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 	infoService := ble.DeviceInfoService(device)
 
@@ -50,13 +50,13 @@ func getInfo(cmd *cobra.Command, args []string) {
 	processDeviceInfo(infoService)
 
 	// Get the battery data
-	requestBatteryInfo(device)
+	RequestBatteryInfo(device)
 
 	// Output received ring data
 	outputRingInfo()
 }
 
-func requestBatteryInfo(device bluetooth.Device) {
+func RequestBatteryInfo(device bluetooth.Device) {
 
 	requestPacket := ring.MakeBatteryRequest()
 	ble.RequestDataViaCommandUART(device, requestPacket, receiveBatteryInfo, 1)

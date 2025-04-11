@@ -27,7 +27,7 @@ var HeartRateCmd = &cobra.Command{
 func setHeartRatePeriod(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	// Check for the `--show` flag
 	if getHeartRateSettings {
@@ -61,7 +61,7 @@ func setHeartRatePeriod(cmd *cobra.Command, args []string) {
 	log.Prompt("Setting heart rate monitoring state")
 
 	// Enable BLE
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodSetRequest(enabled, byte(heartRatePeriod)), receiveHeartRatePeriod, 1)
 }
@@ -69,12 +69,12 @@ func setHeartRatePeriod(cmd *cobra.Command, args []string) {
 func getHeartRatePeriod(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	log.Prompt("Getting heart rate monitoring state")
 
 	// Enable BLE
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartRatePeriod, 1)
 }

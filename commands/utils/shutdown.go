@@ -18,10 +18,10 @@ var ShutdownCmd = &cobra.Command{
 func shutdownRing(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	// Enable BLE
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
 	ble.RequestDataViaCommandUART(device, ring.MakeShutdownRequest(), shutdownPacketSent, 0)
 }

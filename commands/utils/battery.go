@@ -17,21 +17,21 @@ var BatteryCmd = &cobra.Command{
 func getBatteryState(cmd *cobra.Command, args []string) {
 
 	// Make sure we have a ring BLE address from the command line or store
-	getRingAddress()
+	GetRingAddress()
 
 	log.Prompt("Retrieving ring battery state")
 
 	// Enable BLE
 	deviceInfo.battery.Level = 0
-	device := ble.EnableAndConnect(ringAddress)
+	device := ble.EnableAndConnect(RingAddress)
 	defer ble.Disconnect(device)
-	requestBatteryInfo(device)
+	RequestBatteryInfo(device)
 
 	// Output received ring data
-	outputBatteryInfo()
+	OutputBatteryInfo()
 }
 
-func outputBatteryInfo() {
+func OutputBatteryInfo() {
 
 	chargeState := getChargeState(deviceInfo.battery.IsCharging)
 	log.ClearPrompt()
