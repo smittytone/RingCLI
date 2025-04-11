@@ -1,4 +1,4 @@
-# RingCLI 0.1.2
+# RingCLI 0.1.3
 
 CLI access to data stored on the Colmi R02 smart ring.
 
@@ -6,6 +6,7 @@ CLI access to data stored on the Colmi R02 smart ring.
 
 ## Release Notes
 
+* 0.1.3 adds [sleep data retrieval](#daily-sleep-record).
 * 0.1.2 updates [SpO2 retrieval](#daily-blood-oxygen) to list the current day’s values or, if you use the `--full` flag, all data available.
 
 ## Compilation
@@ -150,10 +151,24 @@ The `data` sub-command `spo2` will retrieve the current day‘s blood oxygen (Sp
 ringlci data spo2 --address {your ring BLE address}
 ```
 
-Add the `--full` switch to get a list of all blood oxygen data:
+Add the `--full` switch to get a list of all blood oxygen data available:
 
 ```shell
-ringlci data spo2 --address {your ring BLE address} -- full
+ringlci data spo2 --address {your ring BLE address} --full
+```
+
+#### Daily Sleep Records
+
+The `data` sub-command `sleep` will retrieve the most recent night’s sleep record:
+
+```shell
+ringlci data sleep --address {your ring BLE address}
+```
+
+Add the `--full` switch to get a list of all sleep records available:
+
+```shell
+ringlci data sleep --address {your ring BLE address} --full
 ```
 
 ## Copyright and Licence

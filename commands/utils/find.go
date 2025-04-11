@@ -1,9 +1,9 @@
 package rcUtilsCommands
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
+	log "ringcli/lib/log"
 	ring "ringcli/lib/colmi"
 	"time"
 )
@@ -31,9 +31,9 @@ func findRing(cmd *cobra.Command, args []string) {
 	// Set a long flash count for 'continuous', ie. not literally so
 	if continuousFlash {
 		flashCount = 99
-		fmt.Println("Ring LED flashing continuously")
+		log.Report("Ring LED flashing continuously")
 	} else {
-		fmt.Println("Ring LED flashing")
+		log.Report("Ring LED flashing")
 	}
 
 	// Enable BLE

@@ -13,7 +13,7 @@ type DateStamp struct {
 	TimePhase int // A 15 minute segment within a day
 }
 
-type SportsInfo struct {
+type ActivityInfo struct {
 	Timestamp   DateStamp
 	Steps       int
 	Distance    int
@@ -38,7 +38,7 @@ func MakeStepsRequest(offset int) []byte {
 	return MakePacket(COMMAND_GET_ACTIVITY_DATA, []byte{byte(offset), 0x0F, 0x00, 0x5F, 0x01})
 }
 
-func ParseStepsResponse(packet []byte) SportsInfo {
+func ParseStepsResponse(packet []byte) ActivityInfo {
 
 	/* SAMPLE
 	[67  240 12 1 0 0 0 0 0 0 0 0 0 0 0 64]
@@ -58,7 +58,7 @@ func ParseStepsResponse(packet []byte) SportsInfo {
 
 	// Nothing will be coming - no heart rate taken yet as the ring has not been worn yet
 	if packet[1] == 0xFF && packet[5] == 0 {
-		return SportsInfo{NoData: true}
+		return ActivityInfo{NoData: true}
 	}
 
 	// This seems to be a header signal packet included to set the calorie scale factor
@@ -68,7 +68,7 @@ func ParseStepsResponse(packet []byte) SportsInfo {
 		}
 
 		// No valid data yet so return an empty struct
-		return SportsInfo{}
+		return ActivityInfo{}
 	}
 
 	// Assemble data from the packet
@@ -82,11 +82,11 @@ func ParseStepsResponse(packet []byte) SportsInfo {
 		TimePhase: timeIndex,
 	}
 
-	info := SportsInfo{
+	info := ActivityInfo{
 		Timestamp: packetTime,
-		Steps:     int(packet[10]) << 8 + int(packet[9]),
-		Distance:  int(packet[12]) << 8 + int(packet[11]),
-		Calories:  int(packet[8]) << 8 + int(packet[7]),
+		Steps:     int(packet[10])<<8 + int(packet[9]),
+		Distance:  int(packet[12])<<8 + int(packet[11]),
+		Calories:  int(packet[8])<<8 + int(packet[7]),
 		NoData:    false,
 		IsDone:    false,
 	}
@@ -116,11 +116,11 @@ func TimestampFromNow() DateStamp {
 
 	now := time.Now()
 	stamp := DateStamp{
-		Year: now.Year(),
-		Month: int(now.Month()),
-		Day: now.Day(),
-		Hour: now.Hour(),
-		Minutes: now.Minute(),
+		Year:      now.Year(),
+		Month:     int(now.Month()),
+		Day:       now.Day(),
+		Hour:      now.Hour(),
+		Minutes:   now.Minute(),
 		TimePhase: 0,
 	}
 

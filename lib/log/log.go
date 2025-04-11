@@ -3,8 +3,8 @@ package ringcliLog
 import (
 	"fmt"
 	"os"
-	"strings"
 	spinner "ringcli/lib/spinner"
+	"strings"
 )
 
 const (
@@ -20,13 +20,13 @@ const (
 )
 
 var (
-	bspCount int = 0
+	bspCount      int = 0
 	cursorSpinner *spinner.Spinner
 )
 
 func Prompt(text string) {
 
-	bspCount = Raw(text + "...  ")
+	bspCount = raw(text + "...  ")
 	cursorSpinner = spinner.NewSpinner(CURSOR)
 	cursorSpinner.Start()
 }
@@ -34,29 +34,29 @@ func Prompt(text string) {
 func ClearPrompt() {
 
 	cursorSpinner.Stop()
-	Backspaces(bspCount)
+	backspaces(bspCount)
 }
 
-func Raw(msg string, values ...any) int {
+func raw(msg string, values ...any) int {
 
 	output := fmt.Sprintf(msg, values...)
 	fmt.Fprintf(os.Stderr, output)
 	return len(output)
 }
 
-func Backspaces(count int) {
+func backspaces(count int) {
 
 	if count > 0 {
-		Raw(CSI + fmt.Sprintf("%dD", count))
-		Raw(strings.Repeat(" ", count))
-		Raw(CSI + fmt.Sprintf("%dD", count))
+		raw(CSI + fmt.Sprintf("%dD", count))
+		raw(strings.Repeat(" ", count))
+		raw(CSI + fmt.Sprintf("%dD", count))
 	}
 }
 
-func Backspace(count int) {
+func backspace(count int) {
 
 	if count > 0 {
-		Raw(CSI + fmt.Sprintf("%dD", count))
+		raw(CSI + fmt.Sprintf("%dD", count))
 	}
 }
 

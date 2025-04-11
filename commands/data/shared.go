@@ -9,7 +9,7 @@ import (
 
 const (
 	ADDRESS_FLAG_TEXT = "The rings's BLE address. Required if no ring has been bound."
-	FULL_FLAG_TEXT = "Show all available data, not just the most recent 24-hour period."
+	FULL_FLAG_TEXT    = "Show all available data, not just the most recent 24-hour period."
 )
 
 // Globals for all commands

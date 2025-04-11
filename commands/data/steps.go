@@ -12,7 +12,7 @@ import (
 
 // Globals relevant only to this command
 var (
-	activityTotals ring.SportsInfo // Values combined from individual records
+	activityTotals ring.ActivityInfo // Values combined from individual records
 )
 
 // Define the `steps` sub-command.
@@ -35,13 +35,13 @@ func getSteps(cmd *cobra.Command, args []string) {
 	defer ble.Disconnect(device)
 
 	// Get the activity data
-	requestSportsInfo(device)
+	requestActivityInfo(device)
 
 	// Output received ring data
 	outputStepsInfo()
 }
 
-func requestSportsInfo(device bluetooth.Device) {
+func requestActivityInfo(device bluetooth.Device) {
 
 	// TODO Allow date offset to be added via cli option
 	requestPacket := ring.MakeStepsRequest(0)
@@ -50,27 +50,27 @@ func requestSportsInfo(device bluetooth.Device) {
 	}
 
 	ts := ring.TimestampFromNow()
-	activityTotals = ring.SportsInfo{
-		Steps: 0,
-		Distance: 0,
-		Calories: 0,
-		NoData: true,
-		IsDone: false,
+	activityTotals = ring.ActivityInfo{
+		Steps:       0,
+		Distance:    0,
+		Calories:    0,
+		NoData:      true,
+		IsDone:      false,
 		NewCalories: false,
-		Timestamp: ts,
+		Timestamp:   ts,
 	}
 
-	ble.RequestDataViaCommandUART(device, requestPacket, receiveSportsInfo, 1)
+	ble.RequestDataViaCommandUART(device, requestPacket, receiveActivityInfo, 1)
 }
 
-func receiveSportsInfo(receivedData []byte) {
+func receiveActivityInfo(receivedData []byte) {
 
 	if receivedData[0] == ring.COMMAND_GET_ACTIVITY_UNKNOWN {
 		// Completion notice???
 		ble.UARTInfoReceived = true
 	}
 
-	// Check we have a SportsInfo response
+	// Check we have a ActivityInfo response
 	if receivedData[0] == ring.COMMAND_GET_ACTIVITY_DATA {
 		info := ring.ParseStepsResponse(receivedData)
 		if info.NoData {

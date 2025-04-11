@@ -1,25 +1,22 @@
 package rcDataCommands
 
 import (
-	//"fmt"
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
 	ring "ringcli/lib/colmi"
 	log "ringcli/lib/log"
-	//"strings"
-	//"time"
 )
 
 var (
 	sleepData *ring.SleepData // Pointer to received sleep log data
 )
 
-// Define the `heartrate` sub-command.
+// Define the `sleep` sub-command.
 var SleepCmd = &cobra.Command{
-	Use:       "sleep",
-	Short:     "Get your current sleep report",
-	Long:      "Get your current sleep report",
-	Run:       getSleepReport,
+	Use:   "sleep",
+	Short: "Get your current sleep report",
+	Long:  "Retrieve your current sleep report.",
+	Run:   getSleepReport,
 }
 
 func getSleepReport(cmd *cobra.Command, args []string) {
@@ -56,26 +53,38 @@ func outputSleepData() {
 
 	log.ClearPrompt()
 
+	if sleepData == nil {
+		log.ReportError("No sleep data received")
+		return
+	}
+
 	if showFull {
-		log.Report("Full blood oxygen data from %s", bloodOxygenData.Time.String())
+		for _, period := range sleepData.Periods {
+			outputSleepPeriod(period)
+		}
 	} else {
-		count := len(sleepData.Data)
-		displayPeriod := sleepData.Data[count - 1]
-		total := 0
-		for _, period := range displayPeriod.Sleep {
-			total += period.Duration
-		}
+		count := len(sleepData.Periods)
+		displayPeriod := sleepData.Periods[count-1]
+		outputSleepPeriod(displayPeriod)
+	}
+}
 
-		hours := total / 60
-		mins := total - (hours * 60)
+func outputSleepPeriod(period ring.SleepPeriod) {
 
-		log.Report("Sleep data from %s to %s ", displayPeriod.StartTime.String(), displayPeriod.EndTime.String())
-		log.Report("  Sleep duration: %d hours, %d minutes comprising:", hours, mins)
+	// Get total sleep duration
+	total := 0
+	for _, phase := range period.Phases {
+		total += phase.Duration
+	}
 
-		for _, period := range displayPeriod.Sleep {
-			log.Report("    %d minutes %s", period.Duration, ring.GetSleepType(period.Type))
-		}
+	// Convert minutes duration to hours and minutes, and output
+	hours := total / 60
+	mins := total - (hours * 60)
+	log.Report("Sleep data from %s to %s ", period.StartTime.String(), period.EndTime.String())
+	log.Report("  Sleep duration: %d hours, %d minutes comprising:", hours, mins)
 
-
+	// Output the phase data
+	for _, phase := range period.Phases {
+		log.Report("    %d minutes %s", phase.Duration, ring.GetSleepType(phase.Type))
 	}
 }

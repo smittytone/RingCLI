@@ -18,10 +18,10 @@ var (
 
 // Define the `heartrate` sub-command.
 var HeartRateCmd = &cobra.Command{
-	Use:       "heartrate",
-	Short:     "Get your current heart rate",
-	Long:      "Get your current heart rate",
-	Run:       getHeartRate,
+	Use:   "heartrate",
+	Short: "Get your current heart rate",
+	Long:  "Get your current heart rate",
+	Run:   getHeartRate,
 }
 
 func getHeartRate(cmd *cobra.Command, args []string) {
@@ -79,9 +79,15 @@ func receiveHeartData(receivedData []byte) {
 
 func outputHeartData() {
 
-	noDataMessageStart, noDataMessageEnd := "", ""
 	log.ClearPrompt()
+
+	if heartRateData == nil {
+		log.ReportError("No heart rate data received")
+		return
+	}
+
 	log.Report("Heart Data commencing at %s", heartRateData.Time.String())
+	noDataMessageStart, noDataMessageEnd := "", ""
 	for _, hrdp := range heartRateData.Rates {
 		if hrdp.Time.Before(time.Now()) || hrdp.Time.Equal(time.Now()) {
 			if hrdp.Rate == 0 {
