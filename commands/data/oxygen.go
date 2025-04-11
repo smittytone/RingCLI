@@ -12,7 +12,6 @@ import (
 
 var (
 	bloodOxygenData *ring.BloodOxygenData // Pointer to received heart rate log data
-	showFull bool
 )
 
 // Define the `heartrate` sub-command.

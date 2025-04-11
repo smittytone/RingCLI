@@ -8,26 +8,32 @@ import (
 )
 
 const (
-	ADDRESS_COMMAND_TEXT = "The rings's BLE address. Required if no ring has been bound."
+	ADDRESS_FLAG_TEXT = "The rings's BLE address. Required if no ring has been bound."
+	FULL_FLAG_TEXT = "Show all available data, not just the most recent 24-hour period."
 )
 
 // Globals for all commands
 var (
-	debug            bool     = false // Are we in debug mode?
-	ringAddress      string   = ""    // Ring BLE address
+	debug       bool   = false // Are we in debug mode?
+	ringAddress string = ""    // Ring BLE address
+	showFull    bool   = false // Show all the available data?
 )
 
 // Set up the `data` sub-commands' flags.
 func init() {
 	// Add optional flags: --address
-	StepsCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
+	StepsCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
 
 	// Add optional flags: --address
-	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
+	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
 
 	// Add optional flags: --address, --full
-	BloodOxygenCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_COMMAND_TEXT)
-	BloodOxygenCmd.Flags().BoolVarP(&showFull, "full", "f", false, "Show all available data, not just the most recent 24-hour period.")
+	BloodOxygenCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
+	BloodOxygenCmd.Flags().BoolVarP(&showFull, "full", "f", false, FULL_FLAG_TEXT)
+
+	// Add optional flags: --address, --full
+	SleepCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
+	SleepCmd.Flags().BoolVarP(&showFull, "full", "f", false, FULL_FLAG_TEXT)
 }
 
 // Apply the logging Level string, eg. "debug" from the `--log` flag.

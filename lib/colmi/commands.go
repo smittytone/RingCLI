@@ -26,9 +26,17 @@ const (
 	LANGUAGE_CHINESE              byte   = 0x00
 	LANGUAGE_ENGLISH              byte   = 0x01
 
-	SLEEP_TYPE_NO_DATA            byte   = 0x00
-	SLEEP_TYPE_ERROR              byte   = 0x01
-	SLEEP_TYPE_LIGHT              byte   = 0x02
-	SLEEP_TYPE_DEEP               byte   = 0x03
-	SLEEP_TYPE_AWAKE              byte   = 0x05
+	SLEEP_TYPE_NO_DATA            int    = 0x00
+	SLEEP_TYPE_ERROR              int    = 0x01
+	SLEEP_TYPE_LIGHT              int    = 0x02
+	SLEEP_TYPE_DEEP               int    = 0x03
+	SLEEP_TYPE_REM               int    = 0x04
+	SLEEP_TYPE_AWAKE              int    = 0x05
+
+	SLEEP_STRING_NO_DATA          string = "no data"
+	SLEEP_STRING_ERROR            string = "error"
+	SLEEP_STRING_LIGHT            string = "in light sleep"
+	SLEEP_STRING_DEEP             string = "in deep sleep"
+	SLEEP_STRING_REM              string = "in REM sleep (dreaming)"
+	SLEEP_STRING_AWAKE            string = "awake"
 )
