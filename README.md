@@ -4,6 +4,8 @@ CLI access to data stored on the Colmi R02 smart ring.
 
 ![Colmi R02 smart ring](./images/r02_001.webp)
 
+You can [buy one from Colmi](https://www.colmi.info/products/colmi-r02-smart-ring). They are very cheap.
+
 ## Release Notes
 
 * 0.1.3 adds [sleep data retrieval](#daily-sleep-record).
@@ -16,6 +18,13 @@ CLI access to data stored on the Colmi R02 smart ring.
 1. `cd RingCLI`
 1. `go mod tidy`
 1. `go build -o build/ringcli`
+
+## Thank You
+
+These sites have been invaluable:
+
+* [Colmi BLE API](https://colmi.puxtril.com)
+* [colmi_r02_client](https://tahnok.github.io/colmi_r02_client/colmi_r02_client.html)
 
 ## Usage
 
