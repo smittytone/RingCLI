@@ -17,6 +17,7 @@ var (
 	debug       bool   = false // Are we in debug mode?
 	ringAddress string = ""    // Ring BLE address
 	showFull    bool   = false // Show all the available data?
+	inRealTime  bool   = false // Real-time readings requested
 )
 
 // Set up the `data` sub-commands' flags.
@@ -26,6 +27,7 @@ func init() {
 
 	// Add optional flags: --address
 	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
+	HeartRateCmd.Flags().BoolVarP(&inRealTime, "realtime", "r", false, "Display heart rate readings in real time")
 
 	// Add optional flags: --address, --full
 	BloodOxygenCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)

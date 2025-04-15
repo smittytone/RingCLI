@@ -23,6 +23,21 @@ func MakePacket(command byte, data []byte) []byte {
 	return packet
 }
 
+func MakeStartPacket(command byte) []byte {
+
+	return MakePacket(COMMAND_START_REAL_TIME, []byte{command, REAL_TIME_ACTION_START})
+}
+
+func MakeContinuePacket(command byte) []byte {
+
+	return MakePacket(COMMAND_START_REAL_TIME, []byte{command, REAL_TIME_ACTION_START})
+}
+
+func MakeStopPacket(command byte) []byte {
+
+	return MakePacket(COMMAND_STOP_REAL_TIME, []byte{command, 0x00, 0x00})
+}
+
 func checksum(packet []byte) byte {
 
 	// Add all the bytes together % 255

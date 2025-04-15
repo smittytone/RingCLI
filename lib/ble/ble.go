@@ -25,6 +25,7 @@ var (
 	UARTInfoReceived bool = false
 	isConnected      bool = false
 	currentDevice    *bluetooth.Device
+	PollCount        int = 0
 )
 
 func Open() *bluetooth.Adapter {
@@ -152,6 +153,25 @@ func RequestDataViaCommandUART(device bluetooth.Device, requestPacket []byte, ca
 	}
 }
 
+func RequestPollViaCommandUART(device bluetooth.Device, requestPacket []byte, callback func([]byte)) {
+
+	// Get the characteristics within the UART service
+	characteristics := ReadyCommandUART(device)
+
+	// Enable notifications via RX
+	err := characteristics[1].EnableNotifications(callback)
+	if err != nil {
+		connectTimer.Stop()
+		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not enable UART notifications: %s", err.Error())
+	}
+
+	// Request data via the TX
+	_, err = characteristics[0].WriteWithoutResponse(requestPacket)
+	if err != nil {
+		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not write UART packet: %s", err.Error())
+	}
+}
+
 func ReadyCommandUART(device bluetooth.Device) []bluetooth.DeviceCharacteristic {
 
 	// Get the UART service
@@ -235,4 +255,22 @@ func UUIDFromString(uuid string) bluetooth.UUID {
 	}
 
 	return convertedUUID
+}
+
+func PollRealtime(bleDevice bluetooth.Device, readingType byte, callback func([]byte), count int) {
+
+	PollCount = 0
+	startPacket := ring.MakeStartPacket(readingType)
+	stopPacket := ring.MakeStopPacket(readingType)
+
+	// Make the initial poll data request
+	RequestPollViaCommandUART(bleDevice, startPacket, callback)
+
+	// Pause while we receive the data
+	for PollCount < count {
+		// NOP
+	}
+
+	// Issue the 'stop sending' request
+	RequestPollViaCommandUART(bleDevice, stopPacket, callback)
 }

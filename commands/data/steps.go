@@ -103,19 +103,19 @@ func outputStepsInfo() {
 
 	// Output...
 	log.Report("Activity Info for %d %s %d:", activityTotals.Timestamp.Day, utils.StringifyMonth(activityTotals.Timestamp.Month), activityTotals.Timestamp.Year)
-	log.Report("         Steps: %d", activityTotals.Steps)
+	log.Report("  👟 %d", activityTotals.Steps)
 
 	// Check for later, alternative calories scaling
 	if activityTotals.NewCalories {
-		log.Report("      Calories: %.02f kCal", float32(activityTotals.Calories)/1000)
+		log.Report("  ⚡️ %.02f kCal", float32(activityTotals.Calories)/1000)
 	} else {
-		log.Report("      Calories: %d kCal", activityTotals.Calories)
+		log.Report("  ⚡️ %d kCal", activityTotals.Calories)
 	}
 
 	// Adjust for range of movement order of magnitude
 	if activityTotals.Distance > 999 {
-		log.Report("Distance Moved: %.02f km", float32(activityTotals.Distance)/1000)
+		log.Report("  📏 %.02f km", float32(activityTotals.Distance)/1000)
 	} else {
-		log.Report("Distance Moved: %d m", activityTotals.Distance)
+		log.Report("  📏 %d m", activityTotals.Distance)
 	}
 }

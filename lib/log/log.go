@@ -24,6 +24,21 @@ var (
 	cursorSpinner *spinner.Spinner
 )
 
+func CursorLeft() {
+
+	raw(CSI + "0G")
+}
+
+func CursorHide() {
+
+	raw(CSI + "?25l")
+}
+
+func CursorShow() {
+
+	raw(CSI + "?25h")
+}
+
 func Prompt(text string) {
 
 	bspCount = raw(text + "...  ")
@@ -31,10 +46,24 @@ func Prompt(text string) {
 	cursorSpinner.Start()
 }
 
+func RealtimeDataOut(text string) {
+
+	CursorLeft()
+	bspCount = raw(text + "  ")
+}
+
+func RealtimeDataClear() {
+
+	CursorLeft()
+	CursorShow()
+	bspCount = 0
+}
+
 func ClearPrompt() {
 
 	cursorSpinner.Stop()
 	backspaces(bspCount)
+	bspCount = 0
 }
 
 func raw(msg string, values ...any) int {
@@ -95,6 +124,7 @@ func log(msgType int, msg string, values ...any) {
 
 	if cursorSpinner != nil && cursorSpinner.IsAnimating() {
 		cursorSpinner.Stop()
+		CursorLeft()
 		fmt.Fprintf(os.Stderr, "\n")
 	}
 

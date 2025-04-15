@@ -1,4 +1,4 @@
-# RingCLI 0.1.3
+# RingCLI 0.1.4
 
 CLI access to data stored on the Colmi R02 smart ring.
 
@@ -8,6 +8,7 @@ You can [buy one from Colmi](https://www.colmi.info/products/colmi-r02-smart-rin
 
 ## Release Notes
 
+* 0.1.4 adds [real-time pulse readings](#real-time-heart-rate).
 * 0.1.3 adds [sleep data retrieval](#daily-sleep-record).
 * 0.1.2 updates [SpO2 retrieval](#daily-blood-oxygen) to list the current day’s values or, if you use the `--full` flag, all data available.
 
@@ -151,6 +152,16 @@ The `data` sub-command `heartrate` will retrieve the day’s heart rate readings
 ```shell
 ringlci data heartrate --address {your ring BLE address}
 ```
+
+#### Real Time Heart Rate
+
+Add the `--realtime` flag to the `data` sub-command `heartrate` to view your current heart rate in real time:
+
+```shell
+ringlci data heartrate --address {your ring BLE address} --realtime
+```
+
+It takes a few moments for the ring to begin streaming data, but then you will see your current pulse count. The code presents this for 30 seconds and then provides you with an average value over that time period.
 
 #### Daily Blood Oxygen
 

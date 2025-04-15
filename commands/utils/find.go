@@ -3,8 +3,8 @@ package rcUtilsCommands
 import (
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
-	log "ringcli/lib/log"
 	ring "ringcli/lib/colmi"
+	log "ringcli/lib/log"
 	"time"
 )
 

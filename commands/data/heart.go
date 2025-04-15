@@ -1,6 +1,7 @@
 package rcDataCommands
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
 	ring "ringcli/lib/colmi"
@@ -11,9 +12,10 @@ import (
 )
 
 var (
-	heartRateData *ring.HeartRateData // Pointer to received heart rate log data
-	dataEnabled   bool                // Heart rate data monitoring is enabled
-	dataInterval  int                 // Heart rate data monitoring time interval eg. 30 minutes
+	heartRateData         *ring.HeartRateData // Pointer to received heart rate log data
+	dataEnabled           bool                // Heart rate data monitoring is enabled
+	dataInterval          int                 // Heart rate data monitoring time interval eg. 30 minutes
+	heartRateDataRealtime []int               // Real time value store
 )
 
 // Define the `heartrate` sub-command.
@@ -29,20 +31,40 @@ func getHeartRate(cmd *cobra.Command, args []string) {
 	// Make sure we have a ring BLE address from the command line or store
 	getRingAddress()
 
-	log.Prompt("Retrieving heart rate data")
+	// Set the terminal text
+	if inRealTime {
+		log.Prompt("Setting up real-time heart rate data")
+	} else {
+		log.Prompt("Retrieving heart rate data")
+	}
 
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
 
-	// Get the data interval -- we'll use this to parse the received data
-	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartDataSettings, 1)
+	if inRealTime {
+		// Poll for heart rate data in real time: readings every 30s
+		ble.PollRealtime(device, ring.REAL_TIME_HEART_RATE, receiveHeartDataRealtime, 30)
+		log.RealtimeDataClear()
+		log.Report("Last reading: %d bpm", heartRateDataRealtime[len(heartRateDataRealtime)-1])
+		log.Report("Average over 30 seconds: %d bpm", getAverage())
+	} else {
+		// Get the data interval -- we'll use this to parse the received data
+		ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartDataSettings, 1)
 
-	// Get the activity data
-	requestHeartData(device)
+		// Get the activity data
+		requestHeartData(device)
 
-	// Output received ring data
-	outputHeartData()
+		// Output received ring data
+		outputHeartData()
+	}
+}
+
+func requestHeartData(device bluetooth.Device) {
+
+	// TODO Allow date offset to be added via CLI option
+	requestPacket := ring.MakeHeartRateReadRequest(utils.StartToday(time.Now().UTC()))
+	ble.RequestDataViaCommandUART(device, requestPacket, receiveHeartData, 1)
 }
 
 func receiveHeartDataSettings(receivedData []byte) {
@@ -58,13 +80,6 @@ func receiveHeartDataSettings(receivedData []byte) {
 	}
 }
 
-func requestHeartData(device bluetooth.Device) {
-
-	// TODO Allow date offset to be added via CLI option
-	requestPacket := ring.MakeHeartRateReadRequest(utils.StartToday(time.Now().UTC()))
-	ble.RequestDataViaCommandUART(device, requestPacket, receiveHeartData, 1)
-}
-
 func receiveHeartData(receivedData []byte) {
 
 	data := ring.ParseHeartRateDataResponse(receivedData, dataInterval)
@@ -75,6 +90,42 @@ func receiveHeartData(receivedData []byte) {
 		// Signal data received
 		ble.UARTInfoReceived = true
 	}
+}
+
+func receiveHeartDataRealtime(receivedData []byte) {
+
+	ok, data := ring.ParseRealtimeHeartDataResponse(receivedData)
+	if ok {
+		log.ClearPrompt()
+
+		// Got data
+		if heartRateDataRealtime == nil {
+			heartRateDataRealtime = make([]int, 0, 60)
+		}
+
+		heartRateDataRealtime = append(heartRateDataRealtime, data.Value)
+		var formatString string
+		if ble.PollCount%2 == 0 {
+			formatString = "❤️\t%d bpm "
+		} else {
+			formatString = "\t%d bpm "
+		}
+
+		log.RealtimeDataOut(fmt.Sprintf(formatString, data.Value))
+
+		// Signal data received
+		ble.PollCount += 1
+	}
+}
+
+func getAverage() int {
+
+	total := 0
+	for _, i := range heartRateDataRealtime {
+		total += i
+	}
+
+	return total / len(heartRateDataRealtime)
 }
 
 func outputHeartData() {

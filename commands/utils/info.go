@@ -128,7 +128,7 @@ func getChargeState(isCharging bool) string {
 
 	chargeState := "not charging"
 	if isCharging {
-		chargeState = "charging"
+		chargeState = "⚡️"
 	}
 
 	return chargeState

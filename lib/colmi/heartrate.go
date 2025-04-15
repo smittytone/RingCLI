@@ -21,6 +21,11 @@ type HeartRateData struct {
 	Time      time.Time
 }
 
+type RealTimeReading struct {
+	Type  int
+	Value int
+}
+
 var (
 	lastPacket  int = 0
 	packetRange int = 0
@@ -181,4 +186,17 @@ func packageHeartRateData(startTime time.Time, minuteDelta int) []HeartRateDatap
 	}
 
 	return results
+}
+
+func ParseRealtimeHeartDataResponse(packet []byte) (bool, RealTimeReading) {
+
+	if packet[0] == COMMAND_START_REAL_TIME && packet[1] == REAL_TIME_HEART_RATE {
+		dataType := packet[1]
+		errCode := packet[2]
+		if errCode == 0 && packet[3] != 0 {
+			return true, RealTimeReading{Type: int(dataType), Value: int(packet[3])}
+		}
+	}
+
+	return false, RealTimeReading{Type: -1, Value: -1}
 }

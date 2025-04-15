@@ -8,6 +8,8 @@ const (
 	COMMAND_HEART_RATE_READ      byte = 0x15
 	COMMAND_HEART_RATE_PERIOD    byte = 0x16
 	COMMAND_GET_ACTIVITY_DATA    byte = 0x43
+	COMMAND_START_REAL_TIME      byte = 0x69
+	COMMAND_STOP_REAL_TIME       byte = 0x70
 	COMMAND_GET_ACTIVITY_UNKNOWN byte = 0x73
 	COMMAND_ERROR                byte = 0xFF
 
@@ -39,4 +41,13 @@ const (
 	SLEEP_STRING_DEEP    string = "in deep sleep"
 	SLEEP_STRING_REM     string = "in REM sleep (dreaming)"
 	SLEEP_STRING_AWAKE   string = "awake"
+
+	REAL_TIME_HEART_RATE   byte = 0x06
+	REAL_TIME_BLOOD_OXYGEN byte = 0x03
+	REAL_TIME_HRV          byte = 0x0A
+
+	REAL_TIME_ACTION_START byte = 0x01
+	REAL_TIME_ACTION_PAUSE byte = 0x02
+	REAL_TIME_ACTION_CONT  byte = 0x03
+	REAL_TIME_ACTION_STOP  byte = 0x04
 )

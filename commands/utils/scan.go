@@ -15,12 +15,17 @@ const (
 	SCAN_TIMEOUT_S = 30
 )
 
+type ScanRecord struct {
+	Name string // BLE device local name
+	Ad   []byte // BLE GAP ad packet
+}
+
 // Globals relevant only to this command
 var (
-	rings            map[string]string = make(map[string]string) // Dictionary of rings. Key is BLE address
-	devices          map[string]string = make(map[string]string) // Dictionary of other devices. Key is BLE address. Debug only
-	scanTimer        *time.Timer                                 // Scan window timer
-	scanForFirstRing bool              = false                   // Stop scanning on first ring found
+	rings            map[string]string     = make(map[string]string)     // Dictionary of rings. Key is BLE address
+	devices          map[string]ScanRecord = make(map[string]ScanRecord) // Dictionary of other devices. Key is BLE address. Debug only
+	scanTimer        *time.Timer                                         // Scan window timer
+	scanForFirstRing bool                  = false                       // Stop scanning on first ring found
 )
 
 // Define the `scan` subcommand.
@@ -56,8 +61,8 @@ func doScan(cmd *cobra.Command, args []string) {
 
 		// Display de-duped list of other BLE devices on debug runs
 		if debug && len(devices) > 0 {
-			for address, name := range devices {
-				log.Report("Device %s with BLE address $s", name, address)
+			for address, record := range devices {
+				log.Report("Device %s with BLE address %s (%v)", record.Name, address, record.Ad)
 			}
 		}
 
@@ -88,12 +93,22 @@ func onScan(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 		}
 	} else if debug {
 		// Only note other devices on debug runs
-		if devices[address] == "" {
+		if _, ok := devices[address]; !ok {
+			record := ScanRecord{}
 			if name != "" {
-				devices[address] = name
+				record.Name = name
 			} else {
-				devices[address] = "Unnamed"
+				record.Name = "Unnamed"
 			}
+
+			record.Ad = make([]byte, 0, 31)
+			if device.AdvertisementPayload != nil {
+				record.Ad = append(record.Ad, device.AdvertisementPayload.Bytes()...)
+			} else {
+				record.Ad = append(record.Ad, []byte{0x01, 0x02, 0x03, 0x04}...)
+			}
+
+			devices[address] = record
 		}
 	}
 }

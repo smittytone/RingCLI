@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	rcLog "ringcli/lib/log"
+	Log "ringcli/lib/log"
 )
 
 type AppVersion struct {
@@ -37,15 +37,17 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 
+	Log.CursorHide()
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}
+	Log.CursorShow()
 }
 
 func showRootHelp(cmd *cobra.Command, args []string) {
 
 	if doShowVersion {
-		rcLog.Report("RingCLI version %d.%d.%d\nCopyright © %d Tony Smith (@smittytone)", Version.Major, Version.Minor, Version.Patch, time.Now().Year())
+		Log.Report("RingCLI version %d.%d.%d\nCopyright © %d Tony Smith (@smittytone)", Version.Major, Version.Minor, Version.Patch, time.Now().Year())
 	} else {
 		showHelp()
 	}

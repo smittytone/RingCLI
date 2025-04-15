@@ -48,6 +48,7 @@ func init() {
 	// SCAN
 	// Add optional flags: --first
 	ScanCmd.Flags().BoolVarP(&scanForFirstRing, "first", "f", false, "Stop scanning once first ring found")
+	ScanCmd.Flags().BoolVarP(&debug, "all", "", false, "Show all devices")
 
 	// SHUTDOWN
 	// Add optional flags: --address
