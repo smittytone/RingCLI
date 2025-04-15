@@ -106,9 +106,9 @@ func receiveHeartDataRealtime(receivedData []byte) {
 		heartRateDataRealtime = append(heartRateDataRealtime, data.Value)
 		var formatString string
 		if ble.PollCount%2 == 0 {
-			formatString = "❤️\t%d bpm "
+			formatString = "%d bpm ❤️"
 		} else {
-			formatString = "\t%d bpm "
+			formatString = "%d bpm   "
 		}
 
 		log.RealtimeDataOut(fmt.Sprintf(formatString, data.Value))
