@@ -12,7 +12,7 @@ import (
 var (
 	versionMajor int = 0
 	versionMinor int = 1
-	versionPatch int = 3
+	versionPatch int = 5
 )
 
 func main() {

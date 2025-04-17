@@ -8,6 +8,7 @@ You can [buy one from Colmi](https://www.colmi.info/products/colmi-r02-smart-rin
 
 ## Release Notes
 
+* 0.1.5 adds auto-binding on scan, and binding can now take an optional display name. This will be the BLE local name
 * 0.1.4 adds [real-time pulse readings](#real-time-heart-rate).
 * 0.1.3 adds [sleep data retrieval](#daily-sleep-record).
 * 0.1.2 updates [SpO2 retrieval](#daily-blood-oxygen) to list the current day’s values or, if you use the `--full` flag, all data available.
@@ -42,6 +43,10 @@ ringcli utils scan --first
 If your ring is in range and powered on (ie. it has been placed the the charger at least once), you should see it listed and you can copy its address.
 
 **Note** The `--first` in the command above causes `ringcli` to halt scanning on the first ring it finds. If you have multiple rings, do not include the `--first` switch. `ringcli` will now list all of them — or, at least, those it can detect within its 60-second scan window.
+
+Include the `--bind` flag to automatically retain the ring’s address and name for future use. See [**Bind a Ring**](#bind-a-ring), below, for more details.
+
+**Note** If *ringlci* detects multiple rings, it will bind the first it finds. This may not be the one you would prefer to be bound. If this is the case, use the [`bind` sub-command](#bind-a-ring) to bind your preferred ring instead. **Hint** Make sure you also also include `bind`’s `--overwrite` flag to revise the existing binding.
 
 #### Set Ring Time
 
@@ -114,6 +119,14 @@ To save having to enter the `--address` option every time, you can ‘bind’ yo
 ```shell
 ringlci utils bind --address {your ring BLE address}
 ```
+
+You can add the ring’s display name, if you wish, with the `--name` option:
+
+```shell
+ringlci utils bind --address {your ring BLE address} --name MySmartRing
+```
+
+The name you add is not used to identify the ring in BLE communications; it is included only for your convenience. If you select the auto-bind option when performing a [scan for rings](#scan-for-rings), the bound name will be set to the ring’s BLE local name.
 
 To check a binding, run:
 
