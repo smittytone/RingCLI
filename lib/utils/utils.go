@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
+	"strings"
 	"time"
 )
 
@@ -15,6 +16,29 @@ func StartToday(date time.Time) time.Time {
 
 func GetStoredRingAddress() string {
 
+	binding := getStoredBinding()
+	parts := strings.Split(binding, "%%")
+	return string(parts[0])
+}
+
+func GetStoredRingName() string {
+
+	// FROM 0.1.5
+	binding := getStoredBinding()
+	parts := strings.Split(binding, "%%")
+	if len(parts) > 1 {
+		return string(parts[1])
+	}
+
+	return "not set"
+}
+
+func getStoredBinding() string {
+
+	// FROM 0.1.5
+	// Get stored binding data:
+    //   0.1.0-0.1.4 - BLE MAC address
+	//   0.1.15-     - BLE MAC address + %% + name
 	homeDirectory, err := os.UserHomeDir()
 	if err != nil {
 		// No home directory!
@@ -60,7 +84,7 @@ func createStoreDirectory() (string, error) {
 	return bindingStoreDirectory, err
 }
 
-func MakeBinding(address string, overwrite bool) {
+func MakeBinding(address string, name string, overwrite bool) {
 
 	// Check and make if necessary the store directory
 	bindingStoreDirectory, err := createStoreDirectory()
@@ -77,7 +101,9 @@ func MakeBinding(address string, overwrite bool) {
 	}
 
 	// Write out a fresh or replacement binding
-	fileData := []byte(address)
+	// FROM 0.1.5 - add name
+	data := address + "%%" + name
+	fileData := []byte(data)
 	err = os.WriteFile(bindingStore, fileData, 0644)
 	if err != nil {
 		log.ReportErrorAndExit(errors.ERROR_CODE_BINDING_FILE_ERROR, "Could not store binding")
