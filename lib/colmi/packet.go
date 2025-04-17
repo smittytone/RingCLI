@@ -30,12 +30,12 @@ func MakeStartPacket(command byte) []byte {
 
 func MakeContinuePacket(command byte) []byte {
 
-	return MakePacket(COMMAND_START_REAL_TIME, []byte{command, REAL_TIME_ACTION_START})
+	return MakePacket(COMMAND_START_REAL_TIME, []byte{command, REAL_TIME_ACTION_CONT})
 }
 
 func MakeStopPacket(command byte) []byte {
 
-	return MakePacket(COMMAND_STOP_REAL_TIME, []byte{command, 0x00, 0x00})
+	return MakePacket(COMMAND_STOP_REAL_TIME, []byte{command})
 }
 
 func checksum(packet []byte) byte {

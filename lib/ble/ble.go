@@ -1,6 +1,7 @@
 package ringcliBLE
 
 import (
+	//"fmt"
 	ring "ringcli/lib/colmi"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
@@ -17,6 +18,8 @@ const (
 	BLE_DEVICE_INFO_SERVICE_HARDWARE_VERSION_CHAR_ID uint16 = 0x2A27
 	BLE_DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID        uint16 = 0x2A23
 	BLE_DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID           uint16 = 0x2A50
+	BLE_GAP_SERVICE_ID                               uint16 = 0x1800
+	BLE_GAP_SERVICE_DEVICE_NAME_CHAR_ID              uint16 = 0x2A00
 )
 
 var (
@@ -86,7 +89,7 @@ func Services(ble bluetooth.Device, uuids []bluetooth.UUID) []bluetooth.DeviceSe
 
 	services, err := ble.DiscoverServices(uuids)
 	if err != nil {
-		connectTimer.Stop()
+		log.ClearPrompt()
 		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not get ring BLE service list: %s", err.Error())
 	}
 
@@ -97,8 +100,12 @@ func Characteristics(service bluetooth.DeviceService, uuids []bluetooth.UUID) []
 
 	characteristics, err := service.DiscoverCharacteristics(uuids)
 	if err != nil {
-		connectTimer.Stop()
-		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not get characteristic list for service %s: %s", service.UUID().String(), err.Error())
+		// FROM 0.1.5
+		// Do not exit on error, instead return an empty array to inform
+		// the caller that one of the characteristics could not be found.
+		// Callers should issue characteristic UUIDs one at a time to learn
+		// which specifics UUIDs are not supported by the ring firmware
+		return []bluetooth.DeviceCharacteristic{}
 	}
 
 	return characteristics
@@ -153,7 +160,7 @@ func RequestDataViaCommandUART(device bluetooth.Device, requestPacket []byte, ca
 	}
 }
 
-func RequestPollViaCommandUART(device bluetooth.Device, requestPacket []byte, callback func([]byte)) {
+func RequestPollViaCommandUART(device bluetooth.Device, requestPacket []byte, callback func([]byte)) []bluetooth.DeviceCharacteristic {
 
 	// Get the characteristics within the UART service
 	characteristics := ReadyCommandUART(device)
@@ -167,6 +174,17 @@ func RequestPollViaCommandUART(device bluetooth.Device, requestPacket []byte, ca
 
 	// Request data via the TX
 	_, err = characteristics[0].WriteWithoutResponse(requestPacket)
+	if err != nil {
+		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not write UART packet: %s", err.Error())
+	}
+
+	return characteristics
+}
+
+func EndPollViaCommandUART(device bluetooth.Device, haltPacket []byte, characteristic bluetooth.DeviceCharacteristic) {
+
+	// Halt polling via the TX
+	_, err := characteristic.WriteWithoutResponse(haltPacket)
 	if err != nil {
 		log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not write UART packet: %s", err.Error())
 	}
@@ -224,6 +242,11 @@ func DeviceInfoService(bleDevice bluetooth.Device) bluetooth.DeviceService {
 
 	uuid := UUIDFromUInt16(BLE_DEVICE_INFO_SERVICE_ID)
 	services := Services(bleDevice, []bluetooth.UUID{uuid})
+
+	if len(services) == 0 {
+		log.ReportErrorAndExit(1, "No GAP service")
+	}
+
 	return services[0]
 }
 
@@ -260,17 +283,33 @@ func UUIDFromString(uuid string) bluetooth.UUID {
 func PollRealtime(bleDevice bluetooth.Device, readingType byte, callback func([]byte), count int) {
 
 	PollCount = 0
-	startPacket := ring.MakeStartPacket(readingType)
-	stopPacket := ring.MakeStopPacket(readingType)
 
 	// Make the initial poll data request
-	RequestPollViaCommandUART(bleDevice, startPacket, callback)
+	characteristics := RequestPollViaCommandUART(bleDevice, ring.MakeStartPacket(readingType), callback)
 
 	// Pause while we receive the data
+	cont := false
 	for PollCount < count {
-		// NOP
+		// Only if `readingType` is 0x01 and we want more than 10 readings, eg. to average over 30s
+		// Otherwise (if `readingType` is 0x06) we just NOP to wait while `PollCount` updated elsewhere
+		if readingType == 0x01 {
+			if PollCount != 0 && !cont && PollCount%10 == 0 {
+				_, err := characteristics[0].WriteWithoutResponse(ring.MakeContinuePacket(readingType))
+				if err != nil {
+					log.ReportErrorAndExit(errors.ERROR_CODE_BLE, "Could not write UART packet: %s", err.Error())
+				}
+
+				cont = true
+			}
+
+			if PollCount == 11 || PollCount == 21 {
+				cont = false
+			}
+		}
 	}
 
 	// Issue the 'stop sending' request
-	RequestPollViaCommandUART(bleDevice, stopPacket, callback)
+	// NOTE This appears unsuccessful if `readingType` is 0x06
+	//      When `readingType` is 0x01, this appears unnecessary - ring only sends 10 readings
+	EndPollViaCommandUART(bleDevice, ring.MakeStopPacket(readingType), characteristics[0])
 }

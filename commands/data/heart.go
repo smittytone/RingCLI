@@ -8,7 +8,6 @@ import (
 	log "ringcli/lib/log"
 	utils "ringcli/lib/utils"
 	"time"
-	"tinygo.org/x/bluetooth"
 )
 
 var (
@@ -33,7 +32,7 @@ func getHeartRate(cmd *cobra.Command, args []string) {
 
 	// Set the terminal text
 	if inRealTime {
-		log.Prompt("Setting up real-time heart rate data")
+		log.Prompt("Setting up real-time heart rate monitoring (can take up to 30 seconds)")
 	} else {
 		log.Prompt("Retrieving heart rate data")
 	}
@@ -44,27 +43,20 @@ func getHeartRate(cmd *cobra.Command, args []string) {
 
 	if inRealTime {
 		// Poll for heart rate data in real time: readings every 30s
-		ble.PollRealtime(device, ring.REAL_TIME_HEART_RATE, receiveHeartDataRealtime, 30)
-		log.RealtimeDataClear()
-		log.Report("Last reading: %d bpm", heartRateDataRealtime[len(heartRateDataRealtime)-1])
-		log.Report("Average over 30 seconds: %d bpm", getAverage())
+		ble.PollRealtime(device, ring.REAL_TIME_HEART_RATE_BATCH, receiveHeartDataRealtime, 10)
+
+		// Output received ring data
+		outputHeartDataRealtime()
 	} else {
 		// Get the data interval -- we'll use this to parse the received data
 		ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartDataSettings, 1)
 
 		// Get the activity data
-		requestHeartData(device)
+		ble.RequestDataViaCommandUART(device, ring.MakeHeartRateReadRequest(utils.StartToday(time.Now().UTC())), receiveHeartDataLog, 1)
 
 		// Output received ring data
-		outputHeartData()
+		outputHeartDataLog()
 	}
-}
-
-func requestHeartData(device bluetooth.Device) {
-
-	// TODO Allow date offset to be added via CLI option
-	requestPacket := ring.MakeHeartRateReadRequest(utils.StartToday(time.Now().UTC()))
-	ble.RequestDataViaCommandUART(device, requestPacket, receiveHeartData, 1)
 }
 
 func receiveHeartDataSettings(receivedData []byte) {
@@ -80,55 +72,51 @@ func receiveHeartDataSettings(receivedData []byte) {
 	}
 }
 
-func receiveHeartData(receivedData []byte) {
+func receiveHeartDataLog(receivedData []byte) {
 
-	data := ring.ParseHeartRateDataResponse(receivedData, dataInterval)
-	if data != nil {
-		// Got data
-		heartRateData = data
+	if receivedData[0] == ring.COMMAND_HEART_RATE_READ {
+		data := ring.ParseHeartRateDataResponse(receivedData, dataInterval)
+		if data != nil {
+			// Got data
+			heartRateData = data
 
-		// Signal data received
-		ble.UARTInfoReceived = true
+			// Signal data received
+			ble.UARTInfoReceived = true
+		}
 	}
 }
 
 func receiveHeartDataRealtime(receivedData []byte) {
 
-	ok, data := ring.ParseRealtimeHeartDataResponse(receivedData)
-	if ok {
-		log.ClearPrompt()
+	//fmt.Println(receivedData)
+	if receivedData[0] == ring.COMMAND_START_REAL_TIME {
+		ok, data := ring.ParseRealtimeHeartDataResponse(receivedData)
+		if ok {
+			log.ClearPrompt()
 
-		// Got data
-		if heartRateDataRealtime == nil {
-			heartRateDataRealtime = make([]int, 0, 60)
+			// Got data
+			if heartRateDataRealtime == nil {
+				heartRateDataRealtime = make([]int, 0, 60)
+			}
+
+			// Output realtime reading
+			heartRateDataRealtime = append(heartRateDataRealtime, data.Value)
+			var formatString string
+			if ble.PollCount%2 == 0 {
+				formatString = "%d bpm ❤️"
+			} else {
+				formatString = "%d bpm   "
+			}
+
+			log.RealtimeDataOut(fmt.Sprintf(formatString, data.Value))
+
+			// Signal data received
+			ble.PollCount += 1
 		}
-
-		heartRateDataRealtime = append(heartRateDataRealtime, data.Value)
-		var formatString string
-		if ble.PollCount%2 == 0 {
-			formatString = "%d bpm ❤️"
-		} else {
-			formatString = "%d bpm   "
-		}
-
-		log.RealtimeDataOut(fmt.Sprintf(formatString, data.Value))
-
-		// Signal data received
-		ble.PollCount += 1
 	}
 }
 
-func getAverage() int {
-
-	total := 0
-	for _, i := range heartRateDataRealtime {
-		total += i
-	}
-
-	return total / len(heartRateDataRealtime)
-}
-
-func outputHeartData() {
+func outputHeartDataLog() {
 
 	log.ClearPrompt()
 
@@ -166,4 +154,25 @@ func outputHeartData() {
 	if noDataMessageStart != "" {
 		log.Report("%s %s (UTC)", noDataMessageStart, noDataMessageEnd)
 	}
+}
+
+func outputHeartDataRealtime() {
+
+	log.RealtimeDataClear()
+
+	count := len(heartRateDataRealtime)
+	if count > 0 {
+		log.Report("Last reading: %d bpm", heartRateDataRealtime[count-1])
+		log.Report("Average over %d readings: %d bpm", count, getAverage())
+	}
+}
+
+func getAverage() int {
+
+	total := 0
+	for _, i := range heartRateDataRealtime {
+		total += i
+	}
+
+	return total / len(heartRateDataRealtime)
 }
