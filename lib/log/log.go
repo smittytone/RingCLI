@@ -117,6 +117,7 @@ func ReportDebug(errMsg string, values ...any) {
 func ReportErrorAndExit(errCode int, errMsg string, values ...any) {
 
 	log(ERROR_MESSAGE, errMsg, values...)
+	CursorShow()
 	os.Exit(errCode)
 }
 
@@ -128,6 +129,7 @@ func log(msgType int, msg string, values ...any) {
 		fmt.Fprintf(os.Stderr, "\n")
 	}
 
+	CursorShow()
 	outputMsg := msg
 	if len(values) > 0 {
 		outputMsg = fmt.Sprintf(msg, values...)
