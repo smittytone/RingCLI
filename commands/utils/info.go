@@ -20,6 +20,18 @@ type DeviceInfo struct {
 	battery  ring.BatteryInfo
 }
 
+func NewDeviceInfo() DeviceInfo {
+	devInfo := DeviceInfo{}
+	devInfo.name = "not set"
+	devInfo.maker = "Colmi (not confirmed by ring)"
+	devInfo.firmware = "Not provided by ring"
+	devInfo.hardware = devInfo.firmware
+	devInfo.system = devInfo.firmware
+	devInfo.pnp = devInfo.firmware
+	devInfo.battery = ring.BatteryInfo{}
+	return devInfo
+}
+
 // Globals relevant only to this command
 var (
 	deviceInfo DeviceInfo = DeviceInfo{} // Device info record
@@ -44,10 +56,9 @@ func getInfo(cmd *cobra.Command, args []string) {
 	deviceInfo.battery.Level = 0
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
-	infoService := ble.DeviceInfoService(device)
 
 	// Get the device data
-	processDeviceInfo(infoService)
+	processDeviceInfo(ble.DeviceInfoService(device))
 
 	// Get the battery data
 	requestBatteryInfo(device)
@@ -72,6 +83,11 @@ func receiveBatteryInfo(receivedData []byte) {
 
 func processDeviceInfo(service bluetooth.DeviceService) {
 
+	// FROM 0.1.5
+	// Firmware RY03_30.00.33_250117 does not include Vendor ID and PNP ID
+	// so the code now samples each data point individually. This is not ideal,
+	// but the underlying TingGo library fails on an all-or-nothing basis.
+
 	// Set the BLE service, characteristic UUIDs
 	uuidvendor := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_MANUFACTURER_CHAR_ID)
 	uuidfirmware := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_FIRMWARE_VERSION_CHAR_ID)
@@ -79,6 +95,44 @@ func processDeviceInfo(service bluetooth.DeviceService) {
 	uuidsystemid := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_SYSTEM_ID_CHAR_ID)
 	uuidpnpid := ble.UUIDFromUInt16(ble.BLE_DEVICE_INFO_SERVICE_PNP_ID_CHAR_ID)
 
+	uuids := []bluetooth.UUID{
+		uuidvendor,
+		uuidfirmware,
+		uuidhardware,
+		uuidsystemid,
+		uuidpnpid,
+	}
+
+	deviceInfo = NewDeviceInfo()
+	deviceInfo.name = getRingName()
+
+	// Sample characteristics one at at time
+	for _, uuid := range uuids {
+		characteristics := ble.Characteristics(service, []bluetooth.UUID{uuid})
+		if len(characteristics) > 0 {
+			for _, characteristic := range characteristics {
+				var data = make([]byte, 64, 64)
+				_, err := characteristic.Read(data)
+				if err == nil {
+					c := characteristic.UUID()
+					switch c {
+					case uuidvendor:
+						deviceInfo.maker = string(data)
+					case uuidfirmware:
+						deviceInfo.firmware = string(data)
+					case uuidhardware:
+						deviceInfo.hardware = string(data)
+					case uuidsystemid:
+						deviceInfo.system = decodeSysId(data)
+					case uuidpnpid:
+						deviceInfo.pnp = decodePnP(data)
+					}
+				}
+			}
+		}
+	}
+
+	/* Old code (0.1.0-0.1.4) which samples all characteristics together
 	// Get a list of characteristics within the service
 	characteristics := ble.Characteristics(service, []bluetooth.UUID{
 		uuidvendor,
@@ -108,6 +162,7 @@ func processDeviceInfo(service bluetooth.DeviceService) {
 			}
 		}
 	}
+	*/
 }
 
 func outputRingInfo() {
@@ -116,6 +171,7 @@ func outputRingInfo() {
 
 	log.ClearPrompt()
 	log.Report("Ring Info:                     ")
+	log.Report("            Name: %s", deviceInfo.name)
 	log.Report("   Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
 	log.Report("Firmware Version: %s", deviceInfo.firmware)
 	log.Report("Hardware Version: %s", deviceInfo.hardware)
