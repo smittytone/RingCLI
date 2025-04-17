@@ -23,8 +23,9 @@ func init() {
 	BatteryCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
 
 	// BIND
-	// Add optional flags: --address, --overwrite, --show
+	// Add optional flags: --address, --overwrite, --show, --name
 	BindCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
+	BindCmd.Flags().StringVarP(&ringName, "name", "n", "not set", "The ring's display name")
 	BindCmd.Flags().BoolVarP(&doOverwrite, "overwrite", "o", false, "Replace an existing binding, if present")
 	BindCmd.Flags().BoolVarP(&doShow, "show", "s", false, "Show an existing binding, if present")
 
@@ -49,6 +50,7 @@ func init() {
 	// Add optional flags: --first
 	ScanCmd.Flags().BoolVarP(&scanForFirstRing, "first", "f", false, "Stop scanning once first ring found")
 	ScanCmd.Flags().BoolVarP(&debug, "all", "", false, "Show all devices")
+	ScanCmd.Flags().BoolVarP(&doBind, "bind", "b", false, "Automatically bind a discovered ring")
 
 	// SHUTDOWN
 	// Add optional flags: --address
@@ -71,4 +73,9 @@ func getRingAddress() {
 			log.ReportErrorAndExit(errors.ERROR_CODE_BAD_PARAMS, "No name or address supplied")
 		}
 	}
+}
+
+func getRingName() string {
+
+	return utils.GetStoredRingName()
 }
