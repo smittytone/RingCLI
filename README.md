@@ -6,6 +6,16 @@ CLI access to data stored on the Colmi R02 smart ring.
 
 You can [buy one from Colmi](https://www.colmi.info/products/colmi-r02-smart-ring). They are very cheap.
 
+For more information, see [this blog post](https://blog.smittytone.net/2025/04/09/hoard-of-the-rings-colmi/).
+
+## Important Note on Firmware Variants
+
+I have had three Colmi R02 rings. All have run slightly different firmware. A silver one bought a month or so back is at 3.00.17; a black one bought recently is on 3.00.33. Yet the companion mobile app tells me both are running the latest firmware! Despite the minor firmware version difference (they are only patches apart, if the version number is anything to go by), the first offers a full BLE Device Info service (for example) whereas the latter lacks some of the information values that service provides. It also offers an unknown service that the (slightly) older ring does not.
+
+The older ring’s BLE Device Info firmware version is `R02_3.00.17_240903`; the newer one’s is `RY02_3.00.33_250117`. Their hardware revisions are `R02_V3.0` and  `RY02_V3.0`, respectively. Apart from the colour, one ring is size 8, the other is size 9. Surely that can’t account for the slightly different hardware version? Maybe it does.
+
+What does all this mean for this project? That it is pursuing a moving target, and that the ring you buy may not operate entirely as expected. If you run into issues, in particular BLE errors, please let me know through the [issues system](https://github.com/smittytone/RingCLI/issues). The
+
 ## Release Notes
 
 * 0.1.5 adds auto-binding on scan, and binding can now take an optional display name. This will be the BLE local name
