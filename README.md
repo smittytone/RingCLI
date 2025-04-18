@@ -14,7 +14,7 @@ I have had three Colmi R02 rings. All have run slightly different firmware. A si
 
 The older ring’s BLE Device Info firmware version is `R02_3.00.17_240903`; the newer one’s is `RY02_3.00.33_250117`. Their hardware revisions are `R02_V3.0` and  `RY02_V3.0`, respectively. Apart from the colour, one ring is size 8, the other is size 9. Surely that can’t account for the slightly different hardware version? Maybe it does.
 
-What does all this mean for this project? That it is pursuing a moving target, and that the ring you buy may not operate entirely as expected. If you run into issues, in particular BLE errors, please let me know through the [issues system](https://github.com/smittytone/RingCLI/issues). The
+What does all this mean for this project? That it is pursuing a moving target, and that the ring you buy may not operate entirely as expected. If you run into issues, in particular BLE errors, please let me know through the [issues system](https://github.com/smittytone/RingCLI/issues).
 
 ## Release Notes
 
