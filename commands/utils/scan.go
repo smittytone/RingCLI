@@ -1,4 +1,4 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
 	"github.com/spf13/cobra"
@@ -6,10 +6,10 @@ import (
 	ble "ringcli/lib/ble"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
+	utils "ringcli/lib/utils"
 	"strings"
 	"time"
 	"tinygo.org/x/bluetooth"
-	utils "ringcli/lib/utils"
 )
 
 const (

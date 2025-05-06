@@ -1,4 +1,4 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
 	"fmt"
@@ -23,11 +23,11 @@ func shutdownRing(cmd *cobra.Command, args []string) {
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
-	ble.RequestDataViaCommandUART(device, ring.MakeShutdownRequest(), shutdownPacketSent, 0)
+	ble.RequestDataViaCommandUART(device, ring.MakeShutdownRequest(), receiveShutdownResponse, 0)
 }
 
-func shutdownPacketSent(receivedData []byte) {
+func receiveShutdownResponse(receivedData []byte) {
 
-	// NOTE Will not be called -- ie not transmitted just before shutdown (as you might expect)
+	// NOTE Will not be called -- ie not transmitted just before ring shutdown (as you might expect)
 	fmt.Println(receivedData)
 }

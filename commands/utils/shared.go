@@ -1,6 +1,8 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
+	"github.com/spf13/cobra"
+	config "ringcli/lib/config"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
 	utils "ringcli/lib/utils"
@@ -58,7 +60,7 @@ func init() {
 
 	// SET TIME
 	// Add optional flags: --address
-	SetTimeCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
+	TimeCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_COMMAND_TEXT)
 }
 
 func getRingAddress() {
@@ -78,4 +80,9 @@ func getRingAddress() {
 func getRingName() string {
 
 	return utils.GetStoredRingName()
+}
+
+func processGenericFlags(cmd *cobra.Command, args []string) {
+
+	config.VerifyConfig()
 }

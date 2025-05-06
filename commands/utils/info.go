@@ -1,4 +1,4 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
 	"fmt"
@@ -29,6 +29,8 @@ func NewDeviceInfo() DeviceInfo {
 	devInfo.system = devInfo.firmware
 	devInfo.pnp = devInfo.firmware
 	devInfo.battery = ring.BatteryInfo{}
+	devInfo.battery.Level = 0
+	devInfo.battery.IsCharging = false
 	return devInfo
 }
 
@@ -53,7 +55,6 @@ func getInfo(cmd *cobra.Command, args []string) {
 	log.Prompt("Retrieving ring information")
 
 	// Enable BLE
-	deviceInfo.battery.Level = 0
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
 
@@ -69,11 +70,10 @@ func getInfo(cmd *cobra.Command, args []string) {
 
 func requestBatteryInfo(device bluetooth.Device) {
 
-	requestPacket := ring.MakeBatteryRequest()
-	ble.RequestDataViaCommandUART(device, requestPacket, receiveBatteryInfo, 1)
+	ble.RequestDataViaCommandUART(device, ring.MakeBatteryRequest(), receiveBatteryInfoResponse, 1)
 }
 
-func receiveBatteryInfo(receivedData []byte) {
+func receiveBatteryInfoResponse(receivedData []byte) {
 
 	if receivedData[0] == ring.COMMAND_BATTERY_INFO {
 		deviceInfo.battery = ring.ParseBatteryResponse(receivedData)
@@ -106,7 +106,7 @@ func processDeviceInfo(service bluetooth.DeviceService) {
 	deviceInfo = NewDeviceInfo()
 	deviceInfo.name = getRingName()
 
-	// Sample characteristics one at at time
+	// Sample characteristics one at at time - see above for reason
 	for _, uuid := range uuids {
 		characteristics := ble.Characteristics(service, []bluetooth.UUID{uuid})
 		if len(characteristics) > 0 {
@@ -182,12 +182,11 @@ func outputRingInfo() {
 
 func getChargeState(isCharging bool) string {
 
-	chargeState := "not charging"
 	if isCharging {
-		chargeState = "⚡️"
+		return "⚡️"
 	}
 
-	return chargeState
+	return "not charging"
 }
 
 func decodePnP(data []byte) string {

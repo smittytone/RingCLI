@@ -1,4 +1,4 @@
-package rcDataCommands
+package DataCommands
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
 	"github.com/spf13/cobra"
@@ -63,7 +63,7 @@ func setHeartRatePeriod(cmd *cobra.Command, args []string) {
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
-	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodSetRequest(enabled, byte(heartRatePeriod)), receiveHeartRatePeriod, 1)
+	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodSetRequest(enabled, byte(heartRatePeriod)), receiveHeartRatePeriodResponse, 1)
 }
 
 func getHeartRatePeriod(cmd *cobra.Command, args []string) {
@@ -76,10 +76,10 @@ func getHeartRatePeriod(cmd *cobra.Command, args []string) {
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
-	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartRatePeriod, 1)
+	ble.RequestDataViaCommandUART(device, ring.MakeHeartRatePeriodGetRequest(), receiveHeartRatePeriodResponse, 1)
 }
 
-func receiveHeartRatePeriod(receivedData []byte) {
+func receiveHeartRatePeriodResponse(receivedData []byte) {
 
 	if receivedData[0] == ring.COMMAND_HEART_RATE_PERIOD {
 		// Parse and report received data

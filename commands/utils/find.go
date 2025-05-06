@@ -1,4 +1,4 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
 	"github.com/spf13/cobra"
@@ -39,11 +39,10 @@ func findRing(cmd *cobra.Command, args []string) {
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
-	requestPacket := ring.MakeLedFlashRequest()
-	ble.RequestDataViaCommandUART(device, requestPacket, flashPacketResponseReceived, flashCount)
+	ble.RequestDataViaCommandUART(device, ring.MakeLedFlashRequest(), receiveFlashPacketResponse, flashCount)
 }
 
-func flashPacketResponseReceived(receivedData []byte) {
+func receiveFlashPacketResponse(receivedData []byte) {
 
 	if receivedData[0] == ring.COMMAND_BATTERY_FLASH_LED {
 		if continuousFlash {

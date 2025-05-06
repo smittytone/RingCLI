@@ -1,4 +1,4 @@
-package rcDataCommands
+package DataCommands
 
 import (
 	"github.com/spf13/cobra"

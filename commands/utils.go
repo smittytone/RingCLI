@@ -3,11 +3,11 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	rcUtilsCommands "ringcli/commands/utils"
+	utilsCommands "ringcli/commands/utils"
 )
 
 // Define the `utils` command.
-var rcUtilsCommand = &cobra.Command{
+var utilsCommand = &cobra.Command{
 	Use:   "utils",
 	Short: "Ring utility commands",
 	Long:  "Scan for Colmi R02 rings and perform housekeeping on one of them.",
@@ -26,13 +26,13 @@ var rcUtilsCommand = &cobra.Command{
 
 func init() {
 
-	rcUtilsCommand.AddCommand(rcUtilsCommands.BatteryCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.BindCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.FindCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.HeartRateCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.InfoCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.ScanCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.ShutdownCmd)
-	rcUtilsCommand.AddCommand(rcUtilsCommands.SetTimeCmd)
-	rootCmd.AddCommand(rcUtilsCommand)
+	utilsCommand.AddCommand(utilsCommands.BatteryCmd)
+	utilsCommand.AddCommand(utilsCommands.BindCmd)
+	utilsCommand.AddCommand(utilsCommands.FindCmd)
+	utilsCommand.AddCommand(utilsCommands.HeartRateCmd)
+	utilsCommand.AddCommand(utilsCommands.InfoCmd)
+	utilsCommand.AddCommand(utilsCommands.ScanCmd)
+	utilsCommand.AddCommand(utilsCommands.ShutdownCmd)
+	utilsCommand.AddCommand(utilsCommands.TimeCmd)
+	rootCmd.AddCommand(utilsCommand)
 }

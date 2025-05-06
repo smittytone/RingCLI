@@ -1,17 +1,19 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
+	config "ringcli/lib/config"
 	log "ringcli/lib/log"
 )
 
 // Define the `battery` subcommand.
 var BatteryCmd = &cobra.Command{
-	Use:   "battery",
-	Short: "Get ring battery state",
-	Long:  "Retrieve the battery state of your smart ring.",
-	Run:   getBatteryState,
+	Use:    "battery",
+	Short:  "Get ring battery state",
+	Long:   "Retrieve the battery state of your smart ring.",
+	PreRun: processGenericFlags,
+	Run:    getBatteryState,
 }
 
 func getBatteryState(cmd *cobra.Command, args []string) {
@@ -25,7 +27,7 @@ func getBatteryState(cmd *cobra.Command, args []string) {
 	deviceInfo.battery.Level = 0
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
-	requestBatteryInfo(device)
+	requestBatteryInfo(device) // See `info.go`
 
 	// Output received ring data
 	outputBatteryInfo()
@@ -33,7 +35,16 @@ func getBatteryState(cmd *cobra.Command, args []string) {
 
 func outputBatteryInfo() {
 
-	chargeState := getChargeState(deviceInfo.battery.IsCharging)
-	log.ClearPrompt()
-	log.Report("Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
+	chargeState := getChargeState(deviceInfo.battery.IsCharging) // See `info.go`
+	if config.Config.OutputToStdout {
+		// Output raw data to stdout
+		log.ToStdout("%d", deviceInfo.battery.Level)
+	} else if config.Config.OutputToJson {
+		// Output data in JSON form to stdout
+		log.ToStdout("{\"%s\":{\"battery\":%d}}", ringAddress, deviceInfo.battery.Level)
+	} else {
+		// Output human readable info to stderr
+		log.ClearPrompt()
+		log.Report("Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
+	}
 }

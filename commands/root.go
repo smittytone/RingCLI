@@ -2,11 +2,10 @@ package commands
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/spf13/cobra"
-
-	Log "ringcli/lib/log"
+	config "ringcli/lib/config"
+	log "ringcli/lib/log"
+	"time"
 )
 
 type AppVersion struct {
@@ -16,8 +15,7 @@ type AppVersion struct {
 }
 
 var (
-	doShowVersion bool       = false
-	Version       AppVersion = AppVersion{
+	Version AppVersion = AppVersion{
 		Major: 0,
 		Minor: 0,
 		Patch: 0,
@@ -37,26 +35,31 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 
-	Log.CursorHide()
+	defer log.CursorShow()
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}
-	Log.CursorShow()
 }
 
 func showRootHelp(cmd *cobra.Command, args []string) {
 
-	if doShowVersion {
-		Log.Report("RingCLI version %d.%d.%d\nCopyright © %d Tony Smith (@smittytone)", Version.Major, Version.Minor, Version.Patch, time.Now().Year())
+	if config.Config.DoShowVersion {
+		showVersion()
 	} else {
 		showHelp()
 	}
 }
 
+func showVersion() {
+	log.Report("RingCLI version %d.%d.%d\nCopyright © %d Tony Smith (@smittytone)", Version.Major, Version.Minor, Version.Patch, time.Now().Year())
+}
+
 func init() {
 
 	// Add persistent flags, ie. those spanning all commands and sub-commands.
-	//rootCmd.PersistentFlags().BoolVarP(&doShowVersion, "version", "", false, "Show tool version information")
+	rootCmd.PersistentFlags().BoolVarP(&config.Config.DoShowVersion, "version", "", false, "Show tool version information")
+	rootCmd.PersistentFlags().BoolVarP(&config.Config.OutputToStdout, "out", "", false, "Output to stdout")
+	rootCmd.PersistentFlags().BoolVarP(&config.Config.OutputToJson, "json", "j", false, "Output as JSON to stdout")
 }
 
 func showHelp() {

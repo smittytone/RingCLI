@@ -1,4 +1,4 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
 	"github.com/spf13/cobra"
@@ -9,8 +9,8 @@ import (
 
 // Globals relevant only to this command
 var (
-	doOverwrite bool   = false // Overwrite an existing address
-	doShow      bool   = false // Display the binding, if present
+	doOverwrite bool   = false     // Overwrite an existing address
+	doShow      bool   = false     // Display the binding, if present
 	ringName    string = "not set" // The ring name FROM 0.1.15
 )
 
@@ -19,7 +19,7 @@ var BindCmd = &cobra.Command{
 	Use:   "bind",
 	Short: "Store a ring BLE address and display name",
 	Long:  "Persist your ring's BLE address and display name across commands.",
-	Run:  bindRing,
+	Run:   bindRing,
 }
 
 func bindRing(cmd *cobra.Command, args []string) {

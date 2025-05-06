@@ -1,4 +1,4 @@
-package rcUtilsCommands
+package UtilsCommands
 
 import (
 	"github.com/spf13/cobra"
@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// Define the `settime` subcommand.
-var SetTimeCmd = &cobra.Command{
+// Define the `time` subcommand.
+var TimeCmd = &cobra.Command{
 	Use:   "time",
 	Short: "Initialise the ring's date and time",
 	Long:  "Initialise the ring's date and time.",
@@ -26,14 +26,13 @@ func setTime(cmd *cobra.Command, args []string) {
 	// Enable BLE
 	device := ble.EnableAndConnect(ringAddress)
 	defer ble.Disconnect(device)
-	requestPacket := ring.MakeTimeSetRequest(time.Now())
-	ble.RequestDataViaCommandUART(device, requestPacket, setTimeResponseReceived, 1)
+	ble.RequestDataViaCommandUART(device, ring.MakeTimeSetRequest(time.Now()), receiveTimeSetResponse, 1)
 
 	log.ClearPrompt()
 	log.Report("Ring's time set")
 }
 
-func setTimeResponseReceived(receivedData []byte) {
+func receiveTimeSetResponse(receivedData []byte) {
 
 	if receivedData[0] == ring.COMMAND_SET_TIME {
 		ble.UARTInfoReceived = true
