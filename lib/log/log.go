@@ -3,6 +3,7 @@ package ringcliLog
 import (
 	"fmt"
 	"os"
+	config "ringcli/lib/config"
 	spinner "ringcli/lib/spinner"
 	"strings"
 )
@@ -24,26 +25,25 @@ var (
 	cursorSpinner *spinner.Spinner
 )
 
-func CursorLeft() {
-
-	raw(CSI + "0G")
-}
-
-func CursorHide() {
-
-	raw(CSI + "?25l")
-}
-
-func CursorShow() {
-
-	raw(CSI + "?25h")
-}
-
 func Prompt(text string) {
 
-	bspCount = raw(text + "...  ")
-	cursorSpinner = spinner.NewSpinner(CURSOR)
-	cursorSpinner.Start()
+	bspCount = raw(text + "...  ") // Allow an extra space for the spinner's backspace to overwrite
+	if !config.Config.OutputToStdout && !config.Config.OutputToJson {
+		CursorHide()
+		if cursorSpinner == nil {
+			cursorSpinner = spinner.NewSpinner(CURSOR)
+		}
+		cursorSpinner.Start()
+	}
+}
+
+func ClearPrompt() {
+
+	if !config.Config.OutputToStdout && !config.Config.OutputToJson {
+		cursorSpinner.Stop()
+		Backspaces(bspCount)
+	}
+	bspCount = 0
 }
 
 func RealtimeDataOut(text string) {
@@ -59,21 +59,22 @@ func RealtimeDataClear() {
 	bspCount = 0
 }
 
-func ClearPrompt() {
+func CursorLeft() {
 
-	cursorSpinner.Stop()
-	backspaces(bspCount)
-	bspCount = 0
+	raw(CSI + "0G")
 }
 
-func raw(msg string, values ...any) int {
+func CursorHide() {
 
-	output := fmt.Sprintf(msg, values...)
-	fmt.Fprintf(os.Stderr, output)
-	return len(output)
+	raw(CSI + "?25l")
 }
 
-func backspaces(count int) {
+func CursorShow() {
+
+	raw(CSI + "?25h")
+}
+
+func Backspaces(count int) {
 
 	if count > 0 {
 		raw(CSI + fmt.Sprintf("%dD", count))
@@ -82,7 +83,7 @@ func backspaces(count int) {
 	}
 }
 
-func backspace(count int) {
+func Backspace(count int) {
 
 	if count > 0 {
 		raw(CSI + fmt.Sprintf("%dD", count))
@@ -121,32 +122,53 @@ func ReportErrorAndExit(errCode int, errMsg string, values ...any) {
 	os.Exit(errCode)
 }
 
+func raw(msg string, values ...any) int {
+
+	output := fmt.Sprintf(msg, values...)
+	if !config.Config.OutputToStdout && !config.Config.OutputToJson {
+		fmt.Fprintf(os.Stderr, output)
+	}
+	return len(output)
+}
+
 func log(msgType int, msg string, values ...any) {
 
-	if cursorSpinner != nil && cursorSpinner.IsAnimating() {
-		cursorSpinner.Stop()
-		CursorLeft()
-		fmt.Fprintf(os.Stderr, "\n")
-	}
+	if !config.Config.OutputToStdout && !config.Config.OutputToJson {
+		if cursorSpinner != nil && cursorSpinner.IsAnimating() {
+			cursorSpinner.Stop()
+			CursorLeft()
+			fmt.Fprintf(os.Stderr, "\n")
+		}
 
-	CursorShow()
+		CursorShow()
+		outputMsg := msg
+		if len(values) > 0 {
+			outputMsg = fmt.Sprintf(msg, values...)
+		}
+
+		switch msgType {
+		case ERROR_MESSAGE:
+			fmt.Fprintln(os.Stderr, "[ERROR]", outputMsg)
+		case WARNING_MESSAGE:
+			fmt.Fprintln(os.Stderr, "[WARNING]", outputMsg)
+		case DEBUG_MESSAGE:
+			fmt.Fprintln(os.Stderr, "[DEBUG]", outputMsg)
+		case DATA_OUTPUT:
+			// Date to be output to stdout
+			fmt.Fprintln(os.Stdout, outputMsg)
+		default:
+			// Standard output
+			fmt.Fprintln(os.Stderr, outputMsg)
+		}
+	}
+}
+
+func ToStdout(msg string, values ...any) {
+
 	outputMsg := msg
 	if len(values) > 0 {
 		outputMsg = fmt.Sprintf(msg, values...)
 	}
 
-	switch msgType {
-	case ERROR_MESSAGE:
-		fmt.Fprintln(os.Stderr, "[ERROR]", outputMsg)
-	case WARNING_MESSAGE:
-		fmt.Fprintln(os.Stderr, "[WARNING]", outputMsg)
-	case DEBUG_MESSAGE:
-		fmt.Fprintln(os.Stderr, "[DEBUG]", outputMsg)
-	case DATA_OUTPUT:
-		// Date to be output to stdout
-		fmt.Fprintln(os.Stdout, outputMsg)
-	default:
-		// Standard output
-		fmt.Fprintln(os.Stderr, outputMsg)
-	}
+	fmt.Fprintln(os.Stdout, outputMsg)
 }
