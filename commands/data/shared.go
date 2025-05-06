@@ -23,18 +23,18 @@ var (
 // Set up the `data` sub-commands' flags.
 func init() {
 	// Add optional flags: --address
-	StepsCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
+	StepsCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_FLAG_TEXT)
 
 	// Add optional flags: --address
-	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
+	HeartRateCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_FLAG_TEXT)
 	HeartRateCmd.Flags().BoolVarP(&inRealTime, "realtime", "r", false, "Display heart rate readings in real time")
 
 	// Add optional flags: --address, --full
-	BloodOxygenCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
+	BloodOxygenCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_FLAG_TEXT)
 	BloodOxygenCmd.Flags().BoolVarP(&showFull, "full", "f", false, FULL_FLAG_TEXT)
 
 	// Add optional flags: --address, --full
-	SleepCmd.Flags().StringVarP(&ringAddress, "address", "", "", ADDRESS_FLAG_TEXT)
+	SleepCmd.Flags().StringVarP(&ringAddress, "address", "a", "", ADDRESS_FLAG_TEXT)
 	SleepCmd.Flags().BoolVarP(&showFull, "full", "f", false, FULL_FLAG_TEXT)
 }
 

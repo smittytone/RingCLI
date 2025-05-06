@@ -3,6 +3,7 @@ package DataCommands
 import (
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
+	config "ringcli/lib/config"
 	ring "ringcli/lib/colmi"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
@@ -101,21 +102,26 @@ func outputStepsInfo() {
 
 	log.ClearPrompt()
 
+	labels := []string{"👟", "⚡️", "📏"}
+	if config.Config.OutputToText {
+		labels = []string{"   Steps", "Calories", "Distance"}
+	}
+
 	// Output...
 	log.Report("Activity Info for %d %s %d:", activityTotals.Timestamp.Day, utils.StringifyMonth(activityTotals.Timestamp.Month), activityTotals.Timestamp.Year)
-	log.Report("  👟 %d", activityTotals.Steps)
+	log.Report("  %s %d", labels[0], activityTotals.Steps)
 
 	// Check for later, alternative calories scaling
 	if activityTotals.NewCalories {
-		log.Report("  ⚡️ %.02f kCal", float32(activityTotals.Calories)/1000)
+		log.Report("  %s %.02f kCal", labels[1], float32(activityTotals.Calories)/1000)
 	} else {
-		log.Report("  ⚡️ %d kCal", activityTotals.Calories)
+		log.Report("  %s %d kCal", labels[1], activityTotals.Calories)
 	}
 
 	// Adjust for range of movement order of magnitude
 	if activityTotals.Distance > 999 {
-		log.Report("  📏 %.02f km", float32(activityTotals.Distance)/1000)
+		log.Report("  %s %.02f km", labels[2], float32(activityTotals.Distance)/1000)
 	} else {
-		log.Report("  📏 %d m", activityTotals.Distance)
+		log.Report("  %s %d m", labels[2], activityTotals.Distance)
 	}
 }

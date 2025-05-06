@@ -37,7 +37,7 @@ func getStoredBinding() string {
 
 	// FROM 0.1.5
 	// Get stored binding data:
-    //   0.1.0-0.1.4 - BLE MAC address
+	//   0.1.0-0.1.4 - BLE MAC address
 	//   0.1.15-     - BLE MAC address + %% + name
 	homeDirectory, err := os.UserHomeDir()
 	if err != nil {

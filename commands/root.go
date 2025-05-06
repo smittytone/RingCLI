@@ -58,8 +58,9 @@ func init() {
 
 	// Add persistent flags, ie. those spanning all commands and sub-commands.
 	rootCmd.PersistentFlags().BoolVarP(&config.Config.DoShowVersion, "version", "", false, "Show tool version information")
-	rootCmd.PersistentFlags().BoolVarP(&config.Config.OutputToStdout, "out", "", false, "Output to stdout")
+	//rootCmd.PersistentFlags().BoolVarP(&config.Config.OutputToStdout, "out", "", false, "Output to stdout")
 	rootCmd.PersistentFlags().BoolVarP(&config.Config.OutputToJson, "json", "j", false, "Output as JSON to stdout")
+	rootCmd.PersistentFlags().BoolVarP(&config.Config.OutputToText, "text", "t", false, "Output using text not emoji")
 }
 
 func showHelp() {
