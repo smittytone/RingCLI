@@ -1,4 +1,4 @@
-# RingCLI 0.1.5
+# RingCLI 0.1.6
 
 CLI access to data stored on the Colmi R02 smart ring.
 

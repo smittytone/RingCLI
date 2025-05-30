@@ -12,7 +12,7 @@ import (
 var (
 	versionMajor int = 0
 	versionMinor int = 1
-	versionPatch int = 5
+	versionPatch int = 6
 )
 
 func main() {
@@ -34,5 +34,6 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
 	commands.Execute()
 }
