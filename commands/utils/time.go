@@ -3,6 +3,7 @@ package UtilsCommands
 import (
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
+	config "ringcli/lib/config"
 	ring "ringcli/lib/colmi"
 	log "ringcli/lib/log"
 	"time"
@@ -29,7 +30,12 @@ func setTime(cmd *cobra.Command, args []string) {
 	ble.RequestDataViaCommandUART(device, ring.MakeTimeSetRequest(time.Now()), receiveTimeSetResponse, 1)
 
 	log.ClearPrompt()
-	log.Report("Ring's time set")
+
+	if config.Config.OutputToText {
+		log.Report("Ring's time set")
+	} else {
+		log.Report("🕗 Ring's time set")
+	}
 }
 
 func receiveTimeSetResponse(receivedData []byte) {

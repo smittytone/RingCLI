@@ -3,6 +3,7 @@ package ringcliSpinner
 import (
 	"fmt"
 	"time"
+	config "ringcli/lib/config"
 )
 
 type Spinner struct {
@@ -11,6 +12,7 @@ type Spinner struct {
 	cursor      string
 	timer       *time.Ticker
 	progress    chan bool
+	lastPos     int
 }
 
 func NewSpinner(frames string) *Spinner {
@@ -35,7 +37,7 @@ func (s *Spinner) Start() {
 		return
 	}
 
-	s.timer = time.NewTicker(50 * time.Millisecond)
+	s.timer = time.NewTicker(150 * time.Millisecond)
 	s.progress = make(chan bool)
 	go func() {
 		for {
@@ -46,13 +48,23 @@ func (s *Spinner) Start() {
 				return
 			case <-s.timer.C:
 				// Ticker fires
-				s.cursorIndex += 1
-				if s.cursorIndex >= len(s.cursor) {
-					s.cursorIndex = 0
-				}
+				if config.Config.OutputToText {
+					fmt.Printf("\x1B7" + string(s.cursor[s.cursorIndex]) + "\x1B8")
+					s.cursorIndex = (s.cursorIndex + 1) % 6
+				} else {
+					count := 0
+					for pos, char := range s.cursor {
+						if count == s.cursorIndex {
+							fmt.Printf("\x1B7" + string(char) + "\x1B8")
+							s.lastPos = pos
+							break
+						}
 
-				fmt.Printf("\x1B[1D")
-				fmt.Printf(string(s.cursor[s.cursorIndex]))
+						count += 1
+					}
+
+					s.cursorIndex = (s.cursorIndex + 1) % 4
+				}
 			}
 		}
 	}()

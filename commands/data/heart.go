@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
+	config "ringcli/lib/config"
 	ring "ringcli/lib/colmi"
 	log "ringcli/lib/log"
 	utils "ringcli/lib/utils"
@@ -101,11 +102,15 @@ func receiveHeartDataRealtime(receivedData []byte) {
 
 			// Output realtime reading
 			heartRateDataRealtime = append(heartRateDataRealtime, data.Value)
-			var formatString string
+			var formatString string = "%d bpm"
 			if ble.PollCount%2 == 0 {
-				formatString = "%d bpm ❤️"
+				if config.Config.OutputToText {
+					formatString += " *"
+				} else {
+					formatString += " ❤️"
+				}
 			} else {
-				formatString = "%d bpm   "
+				formatString += "   "
 			}
 
 			log.RealtimeDataOut(fmt.Sprintf(formatString, data.Value))

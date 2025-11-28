@@ -17,21 +17,28 @@ const (
 
 	ESC    string = "\x1B"
 	CSI    string = ESC + "["
-	CURSOR string = "|/-\\"
+	HOME   string = CSI + "0E"
+	CLINE  string = CSI + "2K"
+	CURSOR_TEXT string = "|/-\\|-"
+	CURSOR_EMOJI string = "🕛🕒🕕🕘"
 )
 
 var (
-	bspCount      int = 0
+	//bspCount      int = 0
 	cursorSpinner *spinner.Spinner
 )
 
 func Prompt(text string) {
 
-	bspCount = raw(text + "...  ") // Allow an extra space for the spinner's backspace to overwrite
-	if !config.Config.OutputToStdout && !config.Config.OutputToJson {
+	raw(text + "... ") // Allow an extra space for the spinner's backspace to overwrite
+	if !config.Config.OutputToJson {
 		CursorHide()
 		if cursorSpinner == nil {
-			cursorSpinner = spinner.NewSpinner(CURSOR)
+			if config.Config.OutputToText {
+				cursorSpinner = spinner.NewSpinner(CURSOR_TEXT)
+			} else {
+				cursorSpinner = spinner.NewSpinner(CURSOR_EMOJI)
+			}
 		}
 		cursorSpinner.Start()
 	}
@@ -39,24 +46,25 @@ func Prompt(text string) {
 
 func ClearPrompt() {
 
-	if !config.Config.OutputToStdout && !config.Config.OutputToJson {
+	if !config.Config.OutputToJson {
 		cursorSpinner.Stop()
-		Backspaces(bspCount)
+		raw("\r" + CLINE)
+		//Backspaces(bspCount)
 	}
-	bspCount = 0
+	//bspCount = 0
 }
 
 func RealtimeDataOut(text string) {
 
 	CursorLeft()
-	bspCount = raw(text + "  ")
+	raw(text + "  ")
 }
 
 func RealtimeDataClear() {
 
 	CursorLeft()
 	CursorShow()
-	bspCount = 0
+	//bspCount = 0
 }
 
 func CursorLeft() {

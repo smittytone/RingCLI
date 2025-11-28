@@ -3,6 +3,7 @@ package ringcliColmi
 import (
 	utils "ringcli/lib/utils"
 	"time"
+	"fmt"
 )
 
 type SleepPhase struct {
@@ -22,6 +23,9 @@ type SleepData struct {
 	Raw     []byte
 }
 
+var packetData []byte
+var dataLength int = 0
+
 func MakeSleepGetRequest() []byte {
 
 	return MakeDataPacket(DATA_REQUEST_ID_SLEEP)
@@ -39,18 +43,31 @@ func ParseSleepDataResponse(packet []byte) *SleepData {
 						002 067 005 006 002 064 003 032 002 016 004 032
 						002 096 003 016 002 032 004 032 002 032 003 016
 						002 016 004 016 005 012 002 013
+
+
+		188 39 45 0 110 194 1 0 42 124 5 151 1 2 16 3 16 4 18 3 38 2 38 4 10 3 8 5 8 2 25 3 47 4 19 2 27 3 57 4 17 2 25 4 17 2 44 5 3 2 10
 	*/
 
 	if packet[1] == DATA_REQUEST_ID_SLEEP {
 		// Max data length, including 'days previous' two-byte markers
-		dataLength := int(packet[3])<<8 | int(packet[2])
+		dataLength = int(packet[3])<<8 | int(packet[2])
+
+		if len(packet) < dataLength + 6 {
+			// Incomplete packet
+			packetData = packet
+			return nil
+		}
+	} else {
+		packetData = append(packetData, packet...)
+	}
+
 
 		// Ignore CRC for now
 		// crc :=int(packet[4]) << 8 | int(packet[5])
-		var crc uint16 = 0
-		for i := range dataLength {
-			crc += uint16(packet[6+i])
-		}
+		//var crc uint16 = 0
+		//for i := range dataLength {
+		//	crc += uint16(packet[6+i])
+		//}
 
 		// Instantiate the return struct
 		days := int(packet[6])
@@ -60,7 +77,7 @@ func ParseSleepDataResponse(packet []byte) *SleepData {
 		}
 
 		index := 7
-		for index < len(packet) {
+		for index+5 < len(packet) {
 			// Get data time range
 			hoursPrevious := time.Duration(packet[index]) * time.Hour * -24
 			midnightTime := utils.StartToday(time.Now()).Add(hoursPrevious).UTC()
@@ -82,6 +99,9 @@ func ParseSleepDataResponse(packet []byte) *SleepData {
 
 			index += 6
 			for range dataCount {
+				if index+1 >= len(packet) {
+					break
+				}
 				phase := SleepPhase{
 					Type:     int(packet[index]),
 					Duration: int(packet[index+1]),

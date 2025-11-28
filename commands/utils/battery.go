@@ -36,10 +36,7 @@ func getBatteryState(cmd *cobra.Command, args []string) {
 func outputBatteryInfo() {
 
 	chargeState := getChargeState(deviceInfo.battery.IsCharging) // See `info.go`
-	if config.Config.OutputToStdout {
-		// Output raw data to stdout
-		log.ToStdout("%d", deviceInfo.battery.Level)
-	} else if config.Config.OutputToJson {
+	if config.Config.OutputToJson {
 		// Output data in JSON form to stdout
 		log.ToStdout("{\"%s\":{\"battery\":%d}}", ringAddress, deviceInfo.battery.Level)
 	} else {

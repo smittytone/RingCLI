@@ -11,8 +11,8 @@ import (
 
 var (
 	versionMajor int = 0
-	versionMinor int = 1
-	versionPatch int = 6
+	versionMinor int = 2
+	versionPatch int = 0
 )
 
 func main() {

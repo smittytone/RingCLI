@@ -3,6 +3,7 @@ package UtilsCommands
 import (
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
+	config "ringcli/lib/config"
 	ring "ringcli/lib/colmi"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
@@ -84,9 +85,14 @@ func receiveHeartRatePeriodResponse(receivedData []byte) {
 	if receivedData[0] == ring.COMMAND_HEART_RATE_PERIOD {
 		// Parse and report received data
 		enabled, period := ring.ParseHeartRatePeriodResponse(receivedData)
-		enabledString := "enabled"
-		if !enabled {
-			enabledString = "disabled"
+		enabledString := "👍"
+		if config.Config.OutputToText {
+			enabledString = "enabled"
+			if !enabled {
+				enabledString = "disabled"
+			}
+		} else if !enabled {
+			enabledString = "👎"
 		}
 
 		log.ClearPrompt()

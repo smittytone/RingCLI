@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	ble "ringcli/lib/ble"
+	config "ringcli/lib/config"
 	ring "ringcli/lib/colmi"
 	log "ringcli/lib/log"
 	"tinygo.org/x/bluetooth"
@@ -169,24 +170,37 @@ func outputRingInfo() {
 
 	chargeState := getChargeState(deviceInfo.battery.IsCharging)
 
-	log.ClearPrompt()
-	log.Report("Ring Info:                     ")
-	log.Report("            Name: %s", deviceInfo.name)
-	log.Report("   Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
-	log.Report("Firmware Version: %s", deviceInfo.firmware)
-	log.Report("Hardware Version: %s", deviceInfo.hardware)
-	log.Report("    Manufacturer: %s", deviceInfo.maker)
-	log.Report("       System ID: %s", deviceInfo.system)
-	log.Report("          PnP ID: %s", deviceInfo.pnp)
+	if config.Config.OutputToJson {
+		// Output data in JSON form to stdout
+		log.ToStdout("{\"%s\":{\"name\":\"%s\",\"battery\":%d,\"versions\":{\"firmware\":\"%s\",\"hardware\":\"%s\"},\"manufacturer\":\"%s\",\"ids\":{\"system\":\"%s\",\"pnp\":\"%s\"}}}", ringAddress, deviceInfo.name, deviceInfo.battery.Level, deviceInfo.firmware, deviceInfo.hardware, "fart", deviceInfo.system, deviceInfo.pnp)
+	} else {
+		log.ClearPrompt()
+		log.Report("Ring Info:                     ")
+		log.Report("            Name: %s", deviceInfo.name)
+		log.Report("   Battery state: %d%% (%s)", deviceInfo.battery.Level, chargeState)
+		log.Report("Firmware Version: %s", deviceInfo.firmware)
+		log.Report("Hardware Version: %s", deviceInfo.hardware)
+		log.Report("    Manufacturer: %s", deviceInfo.maker)
+		log.Report("       System ID: %s", deviceInfo.system)
+		log.Report("          PnP ID: %s", deviceInfo.pnp)
+	}
 }
 
 func getChargeState(isCharging bool) string {
 
 	if isCharging {
+		if config.Config.OutputToText {
+			return "charging"
+		}
+
 		return "⚡️"
 	}
 
-	return "not charging"
+	if config.Config.OutputToText {
+		return "not charging"
+	}
+
+	return "👟"
 }
 
 func decodePnP(data []byte) string {

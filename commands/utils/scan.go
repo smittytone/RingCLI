@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	ble "ringcli/lib/ble"
+	config "ringcli/lib/config"
 	errors "ringcli/lib/errors"
 	log "ringcli/lib/log"
 	utils "ringcli/lib/utils"
@@ -40,7 +41,11 @@ var ScanCmd = &cobra.Command{
 
 func doScan(cmd *cobra.Command, args []string) {
 
-	log.Prompt("Scanning for rings")
+	if config.Config.OutputToText {
+		log.Prompt("Scanning for rings")
+	} else {
+		log.Prompt("🛜 Scanning for rings")
+	}
 
 	// Enable BLE
 	radio := ble.Open()

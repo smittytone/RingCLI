@@ -60,10 +60,10 @@ func ParseBloodOxygenDataResponse(packet []byte) *BloodOxygenData {
 
 		// Ignore CRC for now
 		// crc :=int(packet[4]) << 8 | int(packet[5])
-		var crc uint16 = 0
-		for i := range dataLength {
-			crc += uint16(packet[6+i])
-		}
+		//var crc uint16 = 0
+		//for i := range dataLength {
+		//	crc += uint16(packet[6+i])
+		//}
 
 		// Instantiate the return struct
 		data := BloodOxygenData{
@@ -90,10 +90,13 @@ func ParseBloodOxygenDataResponse(packet []byte) *BloodOxygenData {
 				Time:  dataTime,
 			}
 
-			for j := range 24 {
+			for j := range 23 {
+				if index+1+(j*2) >= len(packet) {
+					break
+				}
 				point := BloodOxygenDatapoint{
 					Maximum:   int(packet[index+(j*2)]),
-					Minimum:   int(packet[index+1+(j*2)]),
+					Minimum:   int(packet[index+(j*2)+1]),
 					Timestamp: fmt.Sprintf("%02d:00", hour),
 					Time:      dataTime,
 				}
